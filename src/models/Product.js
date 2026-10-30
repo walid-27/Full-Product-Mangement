@@ -34,7 +34,12 @@ const mongoose = require('mongoose')
         image: {
             type: String,
             required: true
-        }
+        },
+        lowStockThreshold: {
+            type: Number,
+            default: 5,
+            min: 0
+            }
     },{
         timestamps: true
     }

@@ -28,12 +28,12 @@ const mongoose = require("mongoose");
         stockBefore: {
             type: Number,
             required: true,
-            min: 1,
+            min: 0,
         },
         stockAfter: {
             type: Number,
             required: true,
-            min: 1
+            min: 0
         }
 
     },
