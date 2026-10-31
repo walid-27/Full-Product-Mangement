@@ -52,7 +52,7 @@ const fsPromises = require("fs/promises");
             if (
                 !Number.isInteger(parsedLimit) ||
                 parsedLimit < 1 ||  
-                parsedLimit > 100
+                parsedLimit > 50
             ) {
                 throw new AppError("Limit must be between 1 and 100", 400);
             }

@@ -98,7 +98,7 @@ const inventroy = require("../Services/Inventory.Service")
             });
                
 
-        return createdOrder;
+        return createOrder;
         }finally {
             await session.endSession();
         } 
@@ -109,7 +109,64 @@ const inventroy = require("../Services/Inventory.Service")
         
     }
 
+    const getAllOrder = async(userId, querySearch, queryStatus, queryPage, queryLimit, querySort)=>{
+
+        const presdPage = Number(queryPage ?? 1)
+        const presdLimit = Number(queryLimit ?? 12 )
+
+
+        if(!Number.isInteger(presdPage) || presdPage < 1) throw new AppError("the page number should be positive", 400);
+        if(!Number.isInteger(presdLimit) || presdLimit < 1 || presdLimit > 100) throw new AppError("the page number should be positive", 400);
+
+            const page = presdPage;
+            const limit = presdLimit;
+            const skip = (page - 1) * limit
+
+        const filter = {
+            owner: userId
+        }
+
+        if (querySearch) {
+        const safeSearch = querySearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        filter.$or = [
+            { "userInfo.name": { $regex: safeSearch, $options: "i" } },
+            { "userInfo.city": { $regex: safeSearch, $options: "i" } }
+        ];
+        }
+
+        if(queryStatus){
+            filter.status = queryStatus
+                
+        }
+            const allowedSortFields = ["totalPrice", "createdAt"];  
+
+            const sortField = allowedSortFields.includes(querySort)
+            ? querySort
+            : "createdAt";
+    
+        const geTOrders = await Order.find(filter)
+                                        .sort({[sortField]: -1})
+                                        .skip(skip)
+                                        .limit(limit)
+
+        if(geTOrders.length == 0) throw new AppError(`find ${geTOrders.length} order`, 404)
+            
+        const total = await Order.countDocuments(filter);
+        const totalPages = Math.ceil(total / limit);    
+        return {
+            orders: geTOrders,
+            pagnition: {
+                page,
+                limit,
+                total,
+                totalPages
+            }
+        }
+    }
+
     module.exports = {
-        createOrder 
+        createOrder ,
+        getAllOrder
 
     }

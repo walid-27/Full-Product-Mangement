@@ -8,4 +8,8 @@ router.post("/",
     AuthMiddleware,
     orders.createOrder )
 
+router.get("/",
+    AuthMiddleware,
+    orders.getAllOrder )
+
 module.exports = router
