@@ -12,4 +12,12 @@ router.get("/",
     AuthMiddleware,
     orders.getAllOrder )
 
+router.get("/:id",
+    AuthMiddleware,
+    orders.getOrderById )
+
+router.patch("/:id",
+    AuthMiddleware,
+    orders.updateOrderStatus )
+
 module.exports = router

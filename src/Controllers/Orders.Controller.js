@@ -21,8 +21,29 @@ const Order = require("../Services/Orders.Service")
                     next(err)
                 }
     }
+    const getOrderById = async(req, res, next)=>{
+         try{
+                    const orders = await Order.getOrderById(req.user.userId, req.params.id)
+                    res.status(200).json({
+                        Order: orders
+                    })
+                }catch(err){
+                    next(err)
+                }
+    }
+
+    const updateOrderStatus = async(req, res, next)=>{
+         try{
+                    const orders = await Order.updateOrderStatus(req.params.id, req.user.userId, req.body)
+                    res.status(201).json(orders)
+                }catch(err){
+                    next(err)
+                }
+    }
 
     module.exports ={
         createOrder,
-        getAllOrder
+        getAllOrder,
+        getOrderById,
+        updateOrderStatus
     }

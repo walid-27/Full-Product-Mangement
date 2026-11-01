@@ -165,8 +165,60 @@ const inventroy = require("../Services/Inventory.Service")
         }
     }
 
+
+    const getOrderById = async(userId, orderId)=>{
+
+        if (!mongoose.isValidObjectId(orderId)) {throw new AppError("Invalid order ID", 400);}
+
+        const findOrder = await Order.findOne({
+            _id: orderId,
+            owner: userId
+        })
+
+        if(!findOrder) throw new AppError("Order not Founded", 404);
+
+        return findOrder
+
+    }
+
+    const updateOrderStatus = async(orderId, userId, data)=>{
+        const {status} = data
+         const allowedStatuses = [
+            "pending",
+            "confirmed",
+            "shipped",
+            "delivered",
+            "cancelled"
+        ];
+
+        if (!allowedStatuses.includes(status)) {
+            throw new AppError("Invalid order status", 400);
+        }
+
+        const findOrderAndUpdateStatus = await Order.findOne(
+            {
+                _id: orderId,
+                owner: userId
+            },
+            {
+                $set: {status}
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        )
+
+        if(!findOrder) throw new AppError("Any Order founded with this Id", 404);
+
+        return {
+            message: "the status has been updated",
+            findOrderAndUpdateStatus}
+    }
     module.exports = {
         createOrder ,
-        getAllOrder
+        getAllOrder ,
+        getOrderById,
+        updateOrderStatus
 
     }
