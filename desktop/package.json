@@ -1,0 +1,74 @@
+{
+  "name": "stockflow-desktop",
+  "productName": "StockFlow",
+  "version": "1.0.0",
+  "description": "StockFlow — desktop admin for products, inventory and orders (Electron client for the Full Product Management API)",
+  "main": "src/main/main.js",
+  "author": {
+    "name": "StockFlow"
+  },
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win",
+    "dist:setup": "electron-builder --win nsis",
+    "dist:portable": "electron-builder --win portable",
+    "test": "node test/mock-api.test.js && node test/api-client.test.js && node test/main-process.test.js && node test/ui.test.js"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "^26.0.12",
+    "jsdom": "^26.1.0"
+  },
+  "build": {
+    "appId": "com.stockflow.desktop",
+    "productName": "StockFlow",
+    "copyright": "Copyright © 2026 StockFlow",
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "src/**/*",
+      "assets/icon.ico",
+      "assets/icon.png",
+      "package.json",
+      "!**/*.map"
+    ],
+    "win": {
+      "icon": "assets/icon.ico",
+      "artifactName": "StockFlow-${version}-${arch}.${ext}",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "StockFlow",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "StockFlow-${version}-portable.${ext}",
+      "requestExecutionLevel": "user"
+    }
+  }
+}

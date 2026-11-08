@@ -1,0 +1,21 @@
+StockFlow 1.0.0 - Windows desktop app for the Full Product Management API
+==========================================================================
+
+1) Install Node.js 18+ from https://nodejs.org  (once)
+2) Double-click  1-install.bat     (downloads dependencies, ~100 MB, once)
+3) Double-click  2-run.bat         (starts the app)
+
+To build a real installer / portable .exe:
+   Double-click  3-build-installer.bat   ->  output in the  release\  folder
+
+No backend needed to try it: on the sign-in screen choose "Explore demo mode".
+
+Just want to see the design?  Open  preview\02-dashboard.html  in your browser.
+
+Full documentation: README.md
+
+--------------------------------------------------------------------------
+FR: 1) installez Node.js  2) 1-install.bat  3) 2-run.bat
+    Pour créer un installateur Windows : 3-build-installer.bat (dossier release\)
+    Aucun serveur n'est nécessaire pour tester : bouton "demo mode".
+    Pour voir le design sans rien installer : preview\02-dashboard.html

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StockFlow</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <!-- Custom window frame -->
+    <header class="titlebar" id="titlebar">
+      <div class="titlebar__brand">
+        <span class="brandmark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z" />
+            <path d="m4 7.5 8 4.5 8-4.5" />
+            <path d="M12 12v9" />
+          </svg>
+        </span>
+        <span class="titlebar__title">StockFlow</span>
+        <span class="titlebar__badge" id="mode-badge" hidden>Demo</span>
+      </div>
+
+      <div class="titlebar__drag"></div>
+
+      <button class="titlebar__status" id="conn-status" data-state="unknown" type="button" title="Connection status">
+        <span class="dot"></span>
+        <span id="conn-label">Starting…</span>
+      </button>
+
+      <div class="wincontrols">
+        <button type="button" data-win="minimize" title="Minimize" aria-label="Minimize">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14" /></svg>
+        </button>
+        <button type="button" data-win="maximize" title="Maximize" aria-label="Maximize" id="max-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4.5" y="4.5" width="15" height="15" rx="2" /></svg>
+        </button>
+        <button type="button" data-win="close" class="is-close" title="Close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Boot splash -->
+    <div class="boot" id="boot">
+      <div class="boot__inner">
+        <div class="boot__spinner"></div>
+        <span>Loading StockFlow</span>
+      </div>
+    </div>
+
+    <!-- Sign in -->
+    <div id="auth" hidden></div>
+
+    <!-- Application shell -->
+    <div class="shell" id="shell" hidden>
+      <aside class="sidebar">
+        <nav class="nav" id="nav-main" aria-label="Workspace"></nav>
+        <div class="sidebar__foot">
+          <nav class="nav" id="nav-bottom" aria-label="Preferences"></nav>
+          <button class="userchip" id="userchip" type="button" title="Account and settings"></button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="pagehead">
+          <div class="grow">
+            <h1 id="page-title">Dashboard</h1>
+            <p class="pagehead__sub" id="page-sub"></p>
+          </div>
+          <div class="pagehead__actions" id="page-actions"></div>
+        </header>
+        <div class="view" id="view"></div>
+      </main>
+    </div>
+
+    <div id="modal-root"></div>
+    <div class="toasts" id="toast-root"></div>
+
+    <script src="js/icons.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/views/auth.js"></script>
+    <script src="js/views/dashboard.js"></script>
+    <script src="js/views/products.js"></script>
+    <script src="js/views/inventory.js"></script>
+    <script src="js/views/orders.js"></script>
+    <script src="js/views/settings.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
