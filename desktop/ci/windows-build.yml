@@ -1,0 +1,47 @@
+# Copy this file to  .github/workflows/build-windows.yml  in your repository.
+# Every push then builds the Windows app on a real Windows runner and uploads
+# the installer + portable exe as downloadable artifacts (no local setup needed).
+
+name: Build StockFlow for Windows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build-windows.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build installer + portable exe
+        run: npm run dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: StockFlow-windows
+          path: |
+            desktop/release/*.exe
+            desktop/release/*.blockmap
+          if-no-files-found: error
+          retention-days: 30
