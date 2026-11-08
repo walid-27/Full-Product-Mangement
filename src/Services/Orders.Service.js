@@ -195,7 +195,7 @@ const inventroy = require("../Services/Inventory.Service")
             throw new AppError("Invalid order status", 400);
         }
 
-        const findOrderAndUpdateStatus = await Order.findOne(
+        const findOrderAndUpdateStatus = await Order.findOneAndUpdate(
             {
                 _id: orderId,
                 owner: userId
@@ -209,16 +209,90 @@ const inventroy = require("../Services/Inventory.Service")
             }
         )
 
-        if(!findOrder) throw new AppError("Any Order founded with this Id", 404);
+        if(!findOrder) throw new AppError("Order Not Found", 400);
 
         return {
             message: "the status has been updated",
             findOrderAndUpdateStatus}
     }
+
+    const CancelOrder = async(orderId, ownerId)=>{
+        const findOrder = await Order.findOne({
+                    _id: orderId,
+                    owner: ownerId
+                })
+        if(!findOrder) throw new AppError("Order Not Found", 400);
+                if (findOrder.status === "cancelled") {
+                throw new AppError("Order is already cancelled", 400);
+                }
+                if (["shipped", "delivered"].includes(findOrder.status)) {
+                throw new AppError(
+                    "Cannot cancel an order that has already shipped",
+                    400
+                );
+                }
+                  if (!["pending", "confirmed"].includes(findOrder.status)) {
+                     throw new AppError("Order cannot be cancelled", 400);
+                    }
+
+        
+
+        const session = await mongoose.startSession();
+        try{
+            const CancelOrder = await session.withTransaction(async ()=>{
+
+                  for (const item of findOrder.products) {
+                        await inventroy.StockIn(
+                        { quantity: item.quantity },
+                        item.product,
+                        ownerId,
+                        session
+                        );
+                    }
+                
+
+             const findOrderAndCancel = await Order.findOneAndUpdate(
+                {
+                    _id: orderId,
+                    owner: ownerId
+                },
+                {
+                    $set: {status: "cancelled"}
+                },
+                {
+                    new: true,
+                    runValidators: true,
+                    session
+                }
+            )
+
+              if (!findOrderAndCancel) {
+                throw new AppError(
+                    "Order status changed; please retry",
+                    409
+                    );
+                }
+
+            return findOrderAndCancel
+            })
+            
+            return {
+            message: "the order has been cancelled",
+            CancelOrder}
+
+        }finally{
+            await session.endSession();
+            
+        
+        }
+
+    }
+    
     module.exports = {
         createOrder ,
         getAllOrder ,
         getOrderById,
-        updateOrderStatus
+        updateOrderStatus,
+        CancelOrder
 
     }

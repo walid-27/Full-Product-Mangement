@@ -16,8 +16,12 @@ router.get("/:id",
     AuthMiddleware,
     orders.getOrderById )
 
-router.patch("/:id",
+router.patch("/status/:id",
     AuthMiddleware,
     orders.updateOrderStatus )
+
+router.patch("/cancel-order/:id",
+    AuthMiddleware,
+    orders.CancelOrder )
 
 module.exports = router

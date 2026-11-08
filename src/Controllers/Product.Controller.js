@@ -17,8 +17,9 @@ const ProductServices = require("../Services/Product.Service");
             if (err.code === 11000) {
                 throw new AppError("Product already exists", 409);
                 }
+                 next(err)
         }
-        next(err)
+       
     }
 
     const getProduct = async(req, res, next)=>{

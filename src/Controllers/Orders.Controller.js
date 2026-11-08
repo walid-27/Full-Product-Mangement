@@ -35,6 +35,14 @@ const Order = require("../Services/Orders.Service")
     const updateOrderStatus = async(req, res, next)=>{
          try{
                     const orders = await Order.updateOrderStatus(req.params.id, req.user.userId, req.body)
+                    res.status(200).json(orders)
+                }catch(err){
+                    next(err)
+                }
+    }
+    const CancelOrder = async(req, res, next)=>{
+         try{
+                    const orders = await Order.CancelOrder(req.params.id, req.user.userId)
                     res.status(201).json(orders)
                 }catch(err){
                     next(err)
@@ -45,5 +53,6 @@ const Order = require("../Services/Orders.Service")
         createOrder,
         getAllOrder,
         getOrderById,
-        updateOrderStatus
+        updateOrderStatus,
+        CancelOrder
     }

@@ -1,9 +1,8 @@
-const Product = require('../models/Product')
+const Product = require("../models/Product")
 const AppError = require('../utils/AppError')
 const mongoose = require('mongoose');
 const path = require('path');
 const fs= require('fs')
-const fsPromises = require("fs/promises");
 
 
     const createProduct = async (data, file, userId)=>{

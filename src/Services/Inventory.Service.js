@@ -5,58 +5,63 @@ const AppError = require('../utils/AppError');
 const { ReturnDocument } = require('mongodb');
 
    
-    const StockIn = async(data, productId, userId)=>{
+   const StockIn = async (data, productId, userId, session = null) => {
+  const {quantity} = data ;   
+        console.log(quantity)
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new AppError("Quantity must be a positive integer", 400);
+  }
 
-        const { quantity } = data ?? {};
-        
-        if(quantity <= 0 || !Number.isInteger(quantity)) throw new AppError("Quantity must be a positive integer", 400)
-        const session = await mongoose.startSession();
+  const ownSession = !session;
 
-        try{
-            await session.startTransaction();
+  if (ownSession) {
+    session = await mongoose.startSession();
+  }
 
-        const findProduct = await Product.findOne({
-            owner: userId,
-            _id: productId
+  const performStockIn = async () => {
+    const findProduct = await Product.findOne({
+      owner: userId,
+      _id: productId
+    }).session(session);
 
-        },
-        
-    ).session(session)
-        if (!findProduct) throw new AppError("this product no found it", 404    )
-        const stockBefore = findProduct.stock;
-        const stockAfter = findProduct.stock + quantity;
-
-
-        findProduct.stock = stockAfter
-
-
-        
-            const [createMovment] = await StockMovement.create(
-           [{ owner: userId,
-            product: productId,
-            action: "in",
-            quantity: quantity,
-            stockBefore: stockBefore,
-            stockAfter: stockAfter
-            }],
-            {session}
-        )
-        
-        await findProduct.save({session});
-
-        await session.commitTransaction();
-
-        return createMovment
-        }catch(err){
-            await session.abortTransaction();
-            throw err
-        }finally{
-            await session.endSession();
-        }
-
-
-        
+    if (!findProduct) {
+      throw new AppError("Product not found", 404);
     }
+
+    const stockBefore = findProduct.stock;
+    const stockAfter = stockBefore + quantity;
+
+    findProduct.stock = stockAfter;
+    await findProduct.save({ session });
+
+    const [createMovement] = await StockMovement.create(
+      [{
+        owner: userId,
+        product: productId,
+        action: "in",
+        quantity,
+        stockBefore,
+        stockAfter
+      }],
+      { session }
+    );
+
+    return createMovement;
+  };
+
+  try {
+    if (ownSession) {
+      const result = await session.withTransaction(performStockIn);
+      return result;
+    }
+
+    return await performStockIn();
+  } finally {
+    if (ownSession) {
+      await session.endSession();
+    }
+  }
+};
 
     const StockOut = async(data, productId, userId, session=null )=>{
 

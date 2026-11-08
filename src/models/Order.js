@@ -58,7 +58,7 @@ const mongoose = require("mongoose")
             },
             status: {
                 type: String,
-                enum: ["cancelled", "delivered", "confirmed", "pending"],
+                enum: ["cancelled", "delivered", "confirmed", "pending", "shipped"],
                 required: true
             }
     
