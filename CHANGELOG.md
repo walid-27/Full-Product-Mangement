@@ -1,5 +1,23 @@
 # Changelog
 
+## Phase 1 — Multi-tenancy
+
+### Added
+- Organizations, memberships, four-role permission enforcement, tenant resolution, and organization-scoped JWTs.
+- Signed expiring single-use team invitations, member role/removal/leave flows, organization switching, and owner-only deletion.
+- Organization-scoped audit logs for product, order, stock, team, and organization changes.
+- Cross-tenant isolation, role, invitation, team, and audit regression tests.
+
+### Breaking changes
+- `owner` was replaced by `organization` on Product, Order, and StockMovement; the product unique key is now `(name, organization)`.
+- Protected data routes require a JWT `orgId` claim or verified `x-org-id` header.
+- Registration now creates an organization and owner membership in a transaction. Existing users should log in again after migration.
+
+### Migration
+1. Back up the database and deploy the Phase 1 code without serving writes during migration.
+2. Run `npm run migrate:tenancy` with the production `MONGO_URL` and required environment variables.
+3. Verify memberships and tenant-scoped indexes, then resume traffic and have users log in again.
+
 ## Phase 0 — Security and hardening baseline
 
 ### Added

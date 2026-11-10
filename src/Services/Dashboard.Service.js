@@ -1,13 +1,13 @@
 const  mongoose  = require("mongoose")
 const Product = require("../models/Product")
-const Order = require("../models/Order") 
+const Order = require("../models/Order")
 
-    const AnalysisProduct = async(userId, Datequery)=>{
-        
+    const AnalysisProduct = async(organization, Datequery)=>{
+
         const resualts = await Product.aggregate([
             {
                 $match: {
-                    owner: new mongoose.Types.ObjectId(userId),
+                    organization: new mongoose.Types.ObjectId(organization),
                     ...(Datequery && {
                         createdAt: {
                             $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -18,7 +18,7 @@ const Order = require("../models/Order")
             {
                 $group: {
                     _id: null,
-                    owner: { $first: "$owner"},
+
                     totalProduct: { $sum : 1},
                     totalStock: { $sum : "$stock"},
                     totalPrices: { $sum : { $multiply: ["$price", "$stock"]}},
@@ -29,7 +29,7 @@ const Order = require("../models/Order")
                             1,0
                              ]
                     }}
-                    
+
                 }
             },
             {
@@ -51,17 +51,17 @@ const Order = require("../models/Order")
             outOfStock: 0
         };
         }
- 
-        return resualts[0]; 
+
+        return resualts[0];
     }
 
 
-    const AnalysisOrder = async(userId, Datequery)=>{
+    const AnalysisOrder = async(organization, Datequery)=>{
 
         const resualts = await Order.aggregate([
             {
                 $match: {
-                    owner: new mongoose.Types.ObjectId(userId),
+                    organization: new mongoose.Types.ObjectId(organization),
                      ...(Datequery && {
                         createdAt: {
                             $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -120,23 +120,23 @@ const Order = require("../models/Order")
                     _id: 0
                 }
                 }
-            
+
 
         ])
 
-         if(resualts.length === 0){ 
-        return { 
-        totalOrder: 0, 
-        pendingOrder: 0, 
-        canceledOrder: 0, 
+         if(resualts.length === 0){
+        return {
+        totalOrder: 0,
+        pendingOrder: 0,
+        canceledOrder: 0,
         shippedOrder: 0 ,
         deliveredOrder: 0,
         cancelledOrder: 0,
         totalRevenue: 0
-        }; 
-        } 
- 
-        return resualts[0]; 
+        };
+        }
+
+        return resualts[0];
 
     }
 

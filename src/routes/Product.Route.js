@@ -1,17 +1,19 @@
 const express = require("express");
-const ProductControllers = require("../Controllers/Product.Controller");
+const Products = require("../Controllers/Product.Controller");
 const AuthMiddleware = require("../middleware/AuthMiddleware");
+const resolveTenant = require("../middleware/TenantMiddleware");
+const requireRole = require("../middleware/requireRole");
 const upload = require("../middleware/upload");
 const validate = require("../middleware/validate");
 const schemas = require("../validation/schemas");
 
 const router = express.Router();
-
-router.use(AuthMiddleware);
-router.post("/", upload.single("image"), validate(schemas.product.create), ProductControllers.createProduct);
-router.get("/", validate(schemas.product.list), ProductControllers.getProduct);
-router.get("/analysis", ProductControllers.analysisProducts);
-router.patch("/:id", upload.single("image"), validate(schemas.product.update), ProductControllers.updateProduct);
-router.delete("/:id", validate(schemas.product.byId), ProductControllers.deleteProduct);
+const writeAccess = requireRole("owner", "admin", "staff");
+router.use(AuthMiddleware, resolveTenant);
+router.post("/", writeAccess, upload.single("image"), validate(schemas.product.create), Products.createProduct);
+router.get("/", validate(schemas.product.list), Products.getProduct);
+router.get("/analysis", Products.analysisProducts);
+router.patch("/:id", writeAccess, upload.single("image"), validate(schemas.product.update), Products.updateProduct);
+router.delete("/:id", writeAccess, validate(schemas.product.byId), Products.deleteProduct);
 
 module.exports = router;
