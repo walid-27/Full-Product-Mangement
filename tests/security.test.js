@@ -1,12 +1,10 @@
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
 const request = require("supertest");
 const { Writable } = require("stream");
 const { createApp } = require("../app");
 const app = createApp({ isDatabaseReady: () => true });
 const { validateEnv } = require("../src/config/env");
 const createLogger = require("../src/config/logger");
-const ProductServices = require("../src/Services/Product.Service");
 const AuthServices = require("../src/Services/Auth.Service");
 const AppError = require("../src/utils/AppError");
 
@@ -140,15 +138,13 @@ describe("Phase 0 security baseline", () => {
 
     test("production errors hide internal messages", async () => {
         const isolatedApp = createApp({ config: testConfig({ NODE_ENV: "production" }) });
-        jest.spyOn(ProductServices, "getProduct").mockRejectedValueOnce(
+        jest.spyOn(AuthServices, "register").mockRejectedValueOnce(
             new Error("private database connection details")
         );
-        const userId = new mongoose.Types.ObjectId();
-        const token = jwt.sign({ userId }, process.env.SECRET_JWT);
 
         const response = await request(isolatedApp)
-            .get("/api/product")
-            .set("Authorization", `Bearer ${token}`)
+            .post("/auth/register")
+            .send({ name: "Test User", email: "test@example.com", password: "password123" })
             .expect(500);
 
         expect(response.body).toEqual({

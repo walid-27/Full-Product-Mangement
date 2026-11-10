@@ -14,6 +14,7 @@ const InventoryRoute = require("./src/routes/Inventory.route");
 const OrdersRoute = require("./src/routes/Orders.route");
 const DashboardRoute = require("./src/routes/DashBoard.route");
 const HealthRoute = require("./src/routes/Health.route");
+const OrganizationRoute = require("./src/routes/Organization.route");
 
 const createApp = (options = {}) => {
     const config = options.config || loadEnv();
@@ -60,6 +61,7 @@ const createApp = (options = {}) => {
     app.use("/api/quantity", InventoryRoute);
     app.use("/api/order", OrdersRoute);
     app.use("/api/dashboard", DashboardRoute);
+    app.use("/api/organizations", OrganizationRoute);
     app.use(NotFoundMiddleware);
     app.use(GlobalMiddleware);
 

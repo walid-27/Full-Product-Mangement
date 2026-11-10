@@ -40,6 +40,48 @@ The server listens on `0.0.0.0:5000` by default. Set `TRUST_PROXY=true` only whe
 | `AUTH_RATE_LIMIT_MAX` | No | `10` | Auth requests per IP/window. |
 | `TRUST_PROXY` | No | `false` | Trust the first reverse proxy. |
 
+## Phase 1: multi-tenancy
+
+Every product, order, stock movement, dashboard aggregate, and audit log belongs to an `Organization`. Users access tenants through an active `Membership`; product names are unique per organization rather than per user.
+
+JWTs issued by login, registration, and organization switching include an `orgId` claim. Clients can select another tenant with the `x-org-id` header, but the server always verifies an active membership and organization before executing a route.
+
+### Roles
+
+| Role | Permissions |
+| --- | --- |
+| Viewer | Read products, orders, stock, dashboards, and team membership. |
+| Staff | Viewer permissions plus product, order, and stock writes. |
+| Admin | Staff permissions plus invitations, member management, and audit-log reads. |
+| Owner | Admin permissions plus billing permission and organization deletion. |
+
+The final active owner cannot be removed, demoted, or leave. Only owners can manage owner roles or delete an organization.
+
+### Organization endpoints
+
+- `GET /api/organizations` — list the authenticated user's active organizations.
+- `POST /api/organizations/switch` — issue a JWT scoped to another verified organization.
+- `GET /api/organizations/members` — list active members.
+- `POST /api/organizations/invites` — admin+; create a signed, seven-day invitation.
+- `POST /api/organizations/invites/accept` — authenticated invitee; accept a single-use token.
+- `PATCH /api/organizations/members/:id/role` — admin+; change a member role.
+- `DELETE /api/organizations/members/:id` — admin+; remove a member.
+- `POST /api/organizations/leave` — leave the active organization.
+- `DELETE /api/organizations` — owner only; soft-delete the organization and suspend memberships.
+- `GET /api/organizations/audit-logs` — admin+; paginate and filter by `action`, `entity`, or `actor`.
+
+Until the Phase 2 email transport is introduced, invitation responses include the signed token so it can be delivered by an integration or copied manually. Tokens are stored only as SHA-256 hashes.
+
+### Migrating existing data
+
+Back up MongoDB first, then run:
+
+```sh
+npm run migrate:tenancy
+```
+
+The migration creates an owner organization for each legacy `owner`, replaces `owner` with `organization` on products/orders/stock movements, removes the old product-name index, and builds tenant-scoped indexes. Existing users must log in again to receive an `orgId` claim.
+
 ## Tests
 
 ```sh

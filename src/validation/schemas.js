@@ -98,4 +98,28 @@ const dashboard = {
     orders: { query: z.object({ period: z.literal("30d").optional() }) }
 };
 
-module.exports = { auth, product, inventory, order, dashboard };
+const organization = {
+    switch: { body: z.object({ organizationId: objectId }) },
+    invite: {
+        body: z.object({
+            email: z.string().trim().email().max(320).transform((value) => value.toLowerCase()),
+            role: z.enum(["owner", "admin", "staff", "viewer"])
+        })
+    },
+    acceptInvite: { body: z.object({ token: z.string().min(20).max(4096) }) },
+    changeRole: {
+        params: idParams,
+        body: z.object({ role: z.enum(["owner", "admin", "staff", "viewer"]) })
+    },
+    byId: { params: idParams },
+    audit: {
+        query: z.object({
+            action: z.string().max(100).optional(),
+            entity: z.string().max(100).optional(),
+            actor: objectId.optional(),
+            ...pagination
+        })
+    }
+};
+
+module.exports = { auth, product, inventory, order, dashboard, organization };

@@ -4,209 +4,98 @@ const fs = require("fs");
 const Product = require("../models/Product");
 const AppError = require("../utils/AppError");
 const escapeRegExp = require("../utils/escapeRegExp");
+const Audit = require("./Audit.Service");
 
-const createProduct = async (data, file, userId) => {
-    const { name, price, category, stock, lowStockThreshold } = data;
-
+const createProduct = async (data, file, organization, context) => {
     if (!file) throw new AppError("check your form ", 400);
-
-    const findExsitProduct = await Product.findOne({
-        name,
-        owner: userId
-    });
-
-    if (findExsitProduct) throw new AppError("exsit product ", 400);
-
-    const createdProduct = await Product.create({
-        name,
-        price,
-        category,
-        stock,
-        lowStockThreshold,
-        owner: userId,
-        image: file.filename
-    });
-
-    return {
-        message: "the product has been successfully created",
-        Product: createdProduct
-    };
-};
-
-const getProduct = async (
-    userId,
-    querySearch,
-    queryCategory,
-    queryPage,
-    queryLimit,
-    querySort
-) => {
-    const parsedPage = Number(queryPage ?? 1);
-    const parsedLimit = Number(queryLimit ?? 12);
-
-    if (!Number.isInteger(parsedPage) || parsedPage < 1) {
-        throw new AppError("Page must be a positive integer", 400);
+    const { name, price, category, stock, lowStockThreshold } = data;
+    if (await Product.exists({ name, organization })) {
+        throw new AppError("Product already exists", 409, "PRODUCT_EXISTS");
     }
 
-    if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 50) {
+    const product = await Product.create({
+        name, price, category, stock, lowStockThreshold, organization, image: file.filename
+    });
+    await Audit.record({
+        organization, ...context, action: "product.create", entity: "product",
+        entityId: product._id, after: product
+    });
+    return { message: "the product has been successfully created", Product: product };
+};
+
+const getProduct = async (organization, querySearch, queryCategory, queryPage, queryLimit, querySort) => {
+    const page = Number(queryPage ?? 1);
+    const limit = Number(queryLimit ?? 12);
+    if (!Number.isInteger(page) || page < 1) throw new AppError("Page must be a positive integer", 400);
+    if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
         throw new AppError("Limit must be between 1 and 50", 400);
     }
 
-    const page = parsedPage;
-    const limit = parsedLimit;
-    const skip = (page - 1) * limit;
-    const filter = { owner: userId };
-
-    if (querySearch) {
-        filter.name = {
-            $regex: escapeRegExp(querySearch),
-            $options: "i"
-        };
-    }
-
-    if (queryCategory) {
-        filter.category = {
-            $regex: escapeRegExp(queryCategory),
-            $options: "i"
-        };
-    }
-
+    const filter = { organization };
+    if (querySearch) filter.name = { $regex: escapeRegExp(querySearch), $options: "i" };
+    if (queryCategory) filter.category = { $regex: escapeRegExp(queryCategory), $options: "i" };
     const allowedSortFields = ["name", "price", "createdAt"];
-    const sortField = allowedSortFields.includes(querySort)
-        ? querySort
-        : "createdAt";
+    const sortField = allowedSortFields.includes(querySort) ? querySort : "createdAt";
 
-    const findProducts = await Product.find(filter)
-        .sort({ [sortField]: -1 })
-        .skip(skip)
-        .limit(limit);
-
-    const total = await Product.countDocuments(filter);
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-        products: findProducts,
-        pagnition: {
-            page,
-            limit,
-            total,
-            totalPages
-        }
-    };
-};
-
-const updateProduct = async (data, file, paramsid, userId) => {
-    const findPrdct = await Product.findOne({
-        _id: paramsid,
-        owner: userId
-    });
-
-    if (!findPrdct) throw new AppError("Any Product find it with this ID", 404);
-
-    const imageBeforeUpdate = findPrdct.image;
-
-    if (file) findPrdct.image = file.filename;
-
-    const { name, price, category, lowStockThreshold } = data;
-    if (name !== undefined) findPrdct.name = name;
-    if (price !== undefined) findPrdct.price = price;
-    if (category !== undefined) findPrdct.category = category;
-    if (lowStockThreshold !== undefined) {
-        findPrdct.lowStockThreshold = lowStockThreshold;
-    }
-    await findPrdct.save();
-
-    if (file && imageBeforeUpdate && imageBeforeUpdate !== file.filename) {
-        const imagePath = path.join(
-            __dirname,
-            "../..",
-            "uploads",
-            imageBeforeUpdate
-        );
-        fs.unlink(imagePath, (err) => {
-            if (err) console.log("image deleted field", err.message);
-        });
-    }
-
-    return {
-        message: "the prdouct was successfully updated",
-        product: findPrdct
-    };
-};
-
-const deleteProduct = async (productId, userId) => {
-    const findPrdct = await Product.findOne({
-        _id: productId,
-        owner: userId
-    });
-
-    if (!findPrdct) throw new AppError("The product is not found", 404);
-
-    await Product.deleteOne({
-        _id: productId,
-        owner: userId
-    });
-
-    if (findPrdct.image) {
-        const imagePath = path.join(
-            __dirname,
-            "../..",
-            "uploads",
-            findPrdct.image
-        );
-        fs.unlink(imagePath, (err) => {
-            if (err) console.log("image deleted field", err.message);
-        });
-    }
-
-    return {
-        message: "the product is deleted"
-    };
-};
-
-const analysisProducts = async (userId) => {
-    const results = await Product.aggregate([
-        {
-            $match: {
-                owner: new mongoose.Types.ObjectId(userId)
-            }
-        },
-        {
-            $group: {
-                _id: null,
-                totalProducts: { $sum: 1 },
-                totalStock: { $sum: "$stock" },
-                totalstockValue: {
-                    $sum: { $multiply: ["$price", "$stock"] }
-                }
-            }
-        },
-        {
-            $project: {
-                _id: 0,
-                totalProducts: 1,
-                totalStock: 1,
-                totalstockValue: 1
-            }
-        }
+    const [products, total] = await Promise.all([
+        Product.find(filter).sort({ [sortField]: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+        Product.countDocuments(filter)
     ]);
+    return {
+        products,
+        pagnition: { page, limit, total, totalPages: Math.ceil(total / limit) }
+    };
+};
 
-    if (results.length === 0) {
-        return {
-            totalProducts: 0,
-            totalStock: 0,
-            totalStockValue: 0,
-            averagePrice: 0
-        };
+const removeImage = (filename) => {
+    if (!filename) return;
+    fs.unlink(path.join(__dirname, "../..", "uploads", filename), (err) => {
+        if (err && err.code !== "ENOENT") console.log("image deletion failed", err.message);
+    });
+};
+
+const updateProduct = async (data, file, productId, organization, context) => {
+    const product = await Product.findOne({ _id: productId, organization });
+    if (!product) throw new AppError("Product not found", 404, "PRODUCT_NOT_FOUND");
+    const before = product.toObject();
+    const previousImage = product.image;
+    if (file) product.image = file.filename;
+    for (const field of ["name", "price", "category", "lowStockThreshold"]) {
+        if (data[field] !== undefined) product[field] = data[field];
     }
-
-    return results[0];
+    await product.save();
+    await Audit.record({
+        organization, ...context, action: "product.update", entity: "product",
+        entityId: product._id, before, after: product
+    });
+    if (file && previousImage !== file.filename) removeImage(previousImage);
+    return { message: "the prdouct was successfully updated", product };
 };
 
-module.exports = {
-    createProduct,
-    getProduct,
-    updateProduct,
-    deleteProduct,
-    analysisProducts
+const deleteProduct = async (productId, organization, context) => {
+    const product = await Product.findOne({ _id: productId, organization });
+    if (!product) throw new AppError("Product not found", 404, "PRODUCT_NOT_FOUND");
+    await Product.deleteOne({ _id: productId, organization });
+    await Audit.record({
+        organization, ...context, action: "product.delete", entity: "product",
+        entityId: product._id, before: product
+    });
+    removeImage(product.image);
+    return { message: "the product is deleted" };
 };
+
+const analysisProducts = async (organization) => {
+    const results = await Product.aggregate([
+        { $match: { organization: new mongoose.Types.ObjectId(organization) } },
+        { $group: {
+            _id: null,
+            totalProducts: { $sum: 1 },
+            totalStock: { $sum: "$stock" },
+            totalstockValue: { $sum: { $multiply: ["$price", "$stock"] } }
+        } },
+        { $project: { _id: 0, totalProducts: 1, totalStock: 1, totalstockValue: 1 } }
+    ]);
+    return results[0] || { totalProducts: 0, totalStock: 0, totalStockValue: 0, averagePrice: 0 };
+};
+
+module.exports = { createProduct, getProduct, updateProduct, deleteProduct, analysisProducts };
