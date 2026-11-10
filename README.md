@@ -1,0 +1,64 @@
+# Full Product Management API
+
+Express 5, Mongoose 9, MongoDB, JWT, and multer API for products, inventory, and orders.
+
+## Phase 0: security baseline
+
+- Helmet security headers and configurable CORS origins.
+- Global and stricter `/auth/*` rate limits with standard `RateLimit` headers.
+- Structured Pino HTTP logs, generated request IDs, and credential redaction.
+- Zod validation for existing request bodies, params, and query strings.
+- Consistent JSON errors and production-safe internal error responses.
+- `GET /health` returns `200` when MongoDB is ready and `503` otherwise.
+- Startup fails fast when required environment configuration is missing or invalid.
+
+## Setup
+
+Requirements: Node.js 22+, npm, and a MongoDB replica set (transactions are required).
+
+```sh
+cp .env.example .env
+# Replace SECRET_JWT with a securely generated value and configure MONGO_URL.
+npm ci
+npm run dev
+```
+
+The server listens on `0.0.0.0:5000` by default. Set `TRUST_PROXY=true` only when running behind a trusted reverse proxy.
+
+### Environment variables
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `MONGO_URL` | Yes | — | MongoDB connection URI; use a replica set in deployed environments. |
+| `SECRET_JWT` | Yes | — | JWT signing secret, at least 32 characters. Never commit it. |
+| `NODE_ENV` | No | `development` | `development`, `test`, `staging`, or `production`. |
+| `PORT` | No | `5000` | HTTP listen port. |
+| `CORS_ORIGINS` | No | Local frontend ports | Comma-separated allowed origins; `*` permits any origin. |
+| `LOG_LEVEL` | No | `info` | Pino log level. |
+| `RATE_LIMIT_WINDOW_MS` | No | `900000` | Rate-limit window in milliseconds. |
+| `RATE_LIMIT_MAX` | No | `300` | Global requests per IP/window. |
+| `AUTH_RATE_LIMIT_MAX` | No | `10` | Auth requests per IP/window. |
+| `TRUST_PROXY` | No | `false` | Trust the first reverse proxy. |
+
+## Tests
+
+```sh
+npm test          # Full suite; starts an in-memory MongoDB replica set
+npm run test:unit # Phase 0 middleware/config tests without MongoDB
+```
+
+Jest starts a single-node in-memory MongoDB replica set, so order and inventory transactions run under realistic conditions. k6 load tests under `tests/load/` are excluded from Jest.
+
+## Error responses
+
+Errors use the following shape:
+
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "Request validation failed",
+  "details": [{ "path": "email", "message": "Invalid email" }]
+}
+```
+
+Validation failures return `422`, unknown routes `404`, duplicate resources `409`, invalid/expired tokens `401`, forbidden origins `403`, and throttled requests `429`. In production, unexpected `500` responses never include internal error details. The `x-request-id` response header can be correlated with structured logs.

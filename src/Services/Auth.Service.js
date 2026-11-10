@@ -12,7 +12,7 @@ const jwt = require('jsonwebtoken')
         const checkExsitUser = await Auth.findOne({email: email})
 
         if(checkExsitUser){
-            throw new AppError("this user allready exsit", 400);
+            throw new AppError("this user allready exsit", 409, "USER_EXISTS");
         }
 
         const HashPassword = await bcrypt.hash(password, 10);
@@ -37,13 +37,13 @@ const jwt = require('jsonwebtoken')
         const findUser = await Auth.findOne({email: email});
 
         if(!findUser){
-            throw new AppError("The email or Password is invalaid", 400)
+            throw new AppError("The email or password is invalid", 401, "INVALID_CREDENTIALS")
         }
 
         const comparePassword = await bcrypt.compare(password, findUser.password);
 
         if(!comparePassword){
-            throw new AppError("The email or Password is invalaid", 400);
+            throw new AppError("The email or password is invalid", 401, "INVALID_CREDENTIALS");
         }
 
         const token = await jwt.sign(

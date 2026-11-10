@@ -1,29 +1,23 @@
-const jwt = require('jsonwebtoken')
-const AppError = require('../utils/AppError')
+const jwt = require("jsonwebtoken");
+const AppError = require("../utils/AppError");
 
-
-     function AuthMiddleware (req, res, next){
-        const GEToken = req.headers.authorization
-
-        if(!GEToken){
-            throw new AppError("verife your access", 401)
-        }
-
-        try{
-            const [Schema, token] = GEToken.split(" ")
-
-            if(Schema !== "Bearer" || !token) {throw new AppError("invalid token", 403);}
-
-            const decode = jwt.verify(token, process.env.SECRET_JWT)
-
-            req.user = decode
-
-            next()
-        }
-        catch(err){
-            next(err)
-        }
+function AuthMiddleware(req, res, next) {
+    const authorization = req.headers.authorization;
+    if (!authorization) {
+        return next(new AppError("Authentication required", 401, "AUTH_REQUIRED"));
     }
 
+    const [scheme, token] = authorization.split(" ");
+    if (scheme !== "Bearer" || !token) {
+        return next(new AppError("Invalid authorization header", 401, "INVALID_TOKEN"));
+    }
 
-    module.exports = AuthMiddleware
+    try {
+        req.user = jwt.verify(token, process.env.SECRET_JWT);
+        return next();
+    } catch (err) {
+        return next(err);
+    }
+}
+
+module.exports = AuthMiddleware;
