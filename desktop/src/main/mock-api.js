@@ -69,7 +69,6 @@ function seed() {
     price: item.price,
     category: item.category,
     stock: item.stock,
-    minStock: 5,
     lowStockThreshold: item.lowStockThreshold,
     owner: OWNER,
     image: null,
@@ -312,9 +311,13 @@ function routeProductCreate(body, form, user) {
   const name = String(fields.name || '').trim();
   const price = Number(fields.price);
   const category = fields.category ? String(fields.category).trim() : '';
+  const stock = fields.stock === undefined ? 0 : Number(fields.stock);
+  const lowStockThreshold = fields.lowStockThreshold === undefined ? 5 : Number(fields.lowStockThreshold);
 
   if (!name) return fail(400, 'should add the name');
   if (!Number.isFinite(price) || price <= 0) return fail(400, 'check your Price');
+  if (!Number.isFinite(stock) || stock < 0) return fail(400, 'check your Stock');
+  if (!Number.isFinite(lowStockThreshold) || lowStockThreshold < 0) return fail(400, 'check your low-stock threshold');
 
   const file = form && form.file;
   if (!file || !file.name) return fail(400, 'check your form ');
@@ -327,9 +330,8 @@ function routeProductCreate(body, form, user) {
     name,
     price,
     category,
-    stock: 0,
-    minStock: 5,
-    lowStockThreshold: 5,
+    stock,
+    lowStockThreshold,
     owner: user.userId,
     image: file.name,
     createdAt: now().toISOString(),
@@ -551,10 +553,19 @@ function routeOrderCreate(body, user) {
 }
 
 function routeOrderStatus(id, status) {
-  const allowed = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
-  if (!allowed.includes(status)) return fail(400, 'Invalid order status');
+  const transitions = {
+    pending: ['confirmed'],
+    confirmed: ['shipped'],
+    shipped: ['delivered'],
+    delivered: [],
+    cancelled: []
+  };
+  if (!Object.hasOwn(transitions, status)) return fail(400, 'Invalid order status');
   const order = db.orders.find((item) => item._id === id);
-  if (!order) return fail(400, 'Order Not Found');
+  if (!order) return fail(404, 'Order Not Found');
+  if (!transitions[order.status].includes(status)) {
+    return fail(409, `Cannot change order status from ${order.status} to ${status}`);
+  }
   order.status = status;
   order.updatedAt = now().toISOString();
   persist();
@@ -592,7 +603,7 @@ function routeOrderCancel(id) {
   order.status = 'cancelled';
   order.updatedAt = now().toISOString();
   persist();
-  return ok(201, { message: 'the order has been cancelled', CancelOrder: clone(order) });
+  return ok(200, { message: 'the order has been cancelled', CancelOrder: clone(order) });
 }
 
 /* ---------------------------------------------------------------- router */
@@ -649,10 +660,10 @@ function handle(request) {
       return routeStock(parts[3], (body && body.quantity), 'out', user);
     }
     if (method === 'GET' && parts[2] === 'low-stock') {
-      return ok(201, { low_Quantity: clone(lowStockProducts()) });
+      return ok(200, { low_Quantity: clone(lowStockProducts()) });
     }
     if (method === 'GET' && parts[2] === 'out-stock') {
-      return ok(201, { out_Quantity: clone(outOfStockProducts()) });
+      return ok(200, { out_Quantity: clone(outOfStockProducts()) });
     }
   }
 

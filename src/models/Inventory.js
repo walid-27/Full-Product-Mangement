@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
     const InventorySchema = new mongoose.Schema({
         owner: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "AuthModel",
             required: true
         },
         product: {
@@ -53,7 +53,7 @@ InventorySchema.index({
 // // Useful for inventory reports
 InventorySchema.index({
   owner: 1,
-  type: 1,
+  action: 1,
   createdAt: -1
 });
 

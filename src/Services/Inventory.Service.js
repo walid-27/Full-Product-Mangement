@@ -1,13 +1,11 @@
 const mongoose  = require('mongoose')
 const Product = require('../models/Product')
-const StockMovement = require("../models/inventroy");
+const StockMovement = require("../models/Inventory");
 const AppError = require('../utils/AppError');
-const { ReturnDocument } = require('mongodb');
 
    
    const StockIn = async (data, productId, userId, session = null) => {
-  const {quantity} = data ;   
-        console.log(quantity)
+  const {quantity} = data ;
   if (!Number.isInteger(quantity) || quantity <= 0) {
     throw new AppError("Quantity must be a positive integer", 400);
   }

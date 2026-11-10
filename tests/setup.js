@@ -1,27 +1,29 @@
 const mongoose = require("mongoose");
-const os = require("os");
+const { MongoMemoryReplSet } = require("mongodb-memory-server");
 require("dotenv").config({
-    path: require("path").resolve(__dirname, "../../.env")
+    path: require("path").resolve(__dirname, "../.env")
 });
-jest.setTimeout(15000);
+
+process.env.SECRET_JWT = process.env.SECRET_JWT || "test-secret";
+jest.setTimeout(60000);
+
+let replSet;
 
 beforeAll(async () => {
-
-    await mongoose.connect(
-        "mongodb://127.0.0.1:27017/full_product_api_test",
-        {
-            serverSelectionTimeoutMS: 5000,
-            runtimeAdapters: {
-            os: require("os")
+    replSet = await MongoMemoryReplSet.create({
+        replSet: {
+            count: 1,
+            storageEngine: "wiredTiger"
         }
-        }
-    );
+    });
 
+    await mongoose.connect(replSet.getUri(), {
+        dbName: "full_product_api_test"
+    });
 });
 
 beforeEach(async () => {
     const collections = mongoose.connection.collections;
-
     for (const collection of Object.values(collections)) {
         await collection.deleteMany({});
     }
@@ -29,4 +31,5 @@ beforeEach(async () => {
 
 afterAll(async () => {
     await mongoose.disconnect();
+    if (replSet) await replSet.stop();
 });

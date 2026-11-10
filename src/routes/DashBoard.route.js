@@ -1,14 +1,11 @@
-const express = require('express');
-const AuthMiddleware = require('../middleware/AuthMiddleware')
+const express = require("express");
+const AuthMiddleware = require("../middleware/AuthMiddleware");
+const Dashboard = require("../Controllers/Dashboard.Controller");
+
 const router = express.Router();
 
-const DashBoard = require("../Controllers/Dashboard.Controller")
+router.use(AuthMiddleware);
+router.get("/product", Dashboard.AnalysisProduct);
+router.get("/order", Dashboard.AnalysisOrder);
 
-router.use(AuthMiddleware)
-router.get("/product", 
-    DashBoard.AnalysisProduct
-)
-
-router.get("/order", 
-    DashBoard.AnalysisOrder
-)
+module.exports = router;

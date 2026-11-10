@@ -155,12 +155,12 @@ const productForm = (fields, file) => ({
 
   await test('reports low-stock and out-of-stock lists', () => {
     const low = call('GET', '/api/quantity/low-stock');
-    assert.strictEqual(low.status, 201);
+    assert.strictEqual(low.status, 200);
     assert.ok(Array.isArray(low.data.low_Quantity));
     assert.ok(low.data.low_Quantity.every((product) => product.stock > 0 && product.stock <= product.lowStockThreshold));
 
     const out = call('GET', '/api/quantity/out-stock');
-    assert.strictEqual(out.status, 201);
+    assert.strictEqual(out.status, 200);
     assert.ok(out.data.out_Quantity.every((product) => product.stock === 0));
   });
 
@@ -245,7 +245,7 @@ const productForm = (fields, file) => ({
   await test('cancels an order and returns its stock', () => {
     const before = call('GET', '/api/product', { query: { search: 'Test widget' } }).data.products[0].stock;
     const response = call('PATCH', `/api/order/cancel-order/${order._id}`);
-    assert.strictEqual(response.status, 201);
+    assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.CancelOrder.status, 'cancelled');
 
     const after = call('GET', '/api/product', { query: { search: 'Test widget' } }).data.products[0].stock;
@@ -254,6 +254,10 @@ const productForm = (fields, file) => ({
     const again = call('PATCH', `/api/order/cancel-order/${order._id}`);
     assert.strictEqual(again.status, 400);
     assert.match(again.data.message, /already cancelled/);
+
+    const reopened = call('PATCH', `/api/order/status/${order._id}`, { body: { status: 'confirmed' } });
+    assert.strictEqual(reopened.status, 409);
+    assert.strictEqual(call('GET', '/api/product', { query: { search: 'Test widget' } }).data.products[0].stock, after);
   });
 
   await test('refuses to cancel a shipped order', () => {
