@@ -16,6 +16,8 @@ const OrdersRoute = require("./src/routes/Orders.route");
 const DashboardRoute = require("./src/routes/DashBoard.route");
 const HealthRoute = require("./src/routes/Health.route");
 const OrganizationRoute = require("./src/routes/Organization.route");
+const BillingRoute = require("./src/routes/Billing.route");
+const BillingWebhookRoute = require("./src/routes/BillingWebhook.route");
 
 const createApp = (options = {}) => {
     const config = options.config || loadEnv();
@@ -48,6 +50,7 @@ const createApp = (options = {}) => {
             return callback(error);
         }
     }));
+    app.use("/api/billing/webhook", BillingWebhookRoute);
     app.use(express.json({ limit: "1mb" }));
     app.use(cookieParser());
 
@@ -65,6 +68,7 @@ const createApp = (options = {}) => {
     app.use("/api/order", OrdersRoute);
     app.use("/api/dashboard", DashboardRoute);
     app.use("/api/organizations", OrganizationRoute);
+    app.use("/api/billing", BillingRoute);
     app.use(NotFoundMiddleware);
     app.use(GlobalMiddleware);
 

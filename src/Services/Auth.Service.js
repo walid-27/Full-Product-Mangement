@@ -6,6 +6,7 @@ const Auth = require("../models/Auth");
 const Organization = require("../models/Organization");
 const Membership = require("../models/Membership");
 const RefreshToken = require("../models/RefreshToken");
+const Subscription = require("../models/Subscription");
 const AppError = require("../utils/AppError");
 const Audit = require("./Audit.Service");
 const Account = require("./Account.Service");
@@ -59,7 +60,13 @@ const register = async (data) => {
     try {
         await session.withTransaction(async () => {
             [user] = await Auth.create([{ name, email, password: hashPassword, emailVerifiedAt: null }], { session });
-            [organization] = await Organization.create([{ name: `${name}'s Organization`, slug: `org-${randomUUID()}` }], { session });
+            [organization] = await Organization.create([{ name: `${name}'s Organization`, slug: `org-${randomUUID()}`, plan: "pro" }], { session });
+            await Subscription.create([{
+                organization: organization._id,
+                plan: "pro",
+                status: "trialing",
+                trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+            }], { session });
             const [membership] = await Membership.create([{ user: user._id, organization: organization._id, role: "owner", status: "active" }], { session });
             await Audit.record({ organization: organization._id, actor: user._id, action: "organization.create", entity: "organization", entityId: organization._id, after: organization }, session);
             await Audit.record({ organization: organization._id, actor: user._id, action: "team.owner.create", entity: "membership", entityId: membership._id, after: membership }, session);

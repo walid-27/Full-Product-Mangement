@@ -8,6 +8,7 @@ const OrganizationInvite = require("../models/OrganizationInvite");
 const AppError = require("../utils/AppError");
 const Audit = require("./Audit.Service");
 const { signAccessToken } = require("./Auth.Service");
+const Plans = require("./Plan.Service");
 
 const hashToken = (token) => createHash("sha256").update(token).digest("hex");
 const getMembership = (organization, membershipId) => Membership.findOne({ _id: membershipId, organization });
@@ -50,6 +51,7 @@ const listMembers = async (organization) => Membership.find({ organization, stat
     .lean();
 
 const invite = async (organization, data, context) => {
+    await Plans.assertTeamInvite(organization);
     if (data.role === "owner" && context.actorRole !== "owner") {
         throw new AppError("Only an owner can invite another owner", 403, "ROLE_FORBIDDEN");
     }

@@ -5,6 +5,7 @@ const AppError = require("../utils/AppError");
 const Inventory = require("./Inventory.Service");
 const Audit = require("./Audit.Service");
 const escapeRegExp = require("../utils/escapeRegExp");
+const Plans = require("./Plan.Service");
 
 const createOrder = async (data, organization, context) => {
     const { products, userInfo } = data;
@@ -39,6 +40,7 @@ const createOrder = async (data, organization, context) => {
     const session = await mongoose.startSession();
     try {
         return await session.withTransaction(async () => {
+            await Plans.consumeOrderUsage(organization, session);
             for (const item of orderProducts) {
                 await Inventory.StockOut({ quantity: item.quantity }, item.product, organization, session, context);
             }

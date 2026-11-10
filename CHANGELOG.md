@@ -1,5 +1,24 @@
 # Changelog
 
+## Phase 3 — Billing and plans
+
+### Added
+- Free/Pro/Business limits and feature flags, monthly usage counters, and `402 UPGRADE_REQUIRED` enforcement.
+- Fourteen-day Pro trials, subscription grace periods, period-end cancellation, invoices, and automatic Free downgrade.
+- Chargily Pay checkout abstraction, raw-body HMAC-SHA512 webhook verification, and idempotent event processing.
+- Billing audit records plus receipt, payment-failed, and one-time trial-ending emails.
+- Billing integration tests and provider/plan unit tests.
+
+### Breaking changes
+- New organizations start with a Pro trial and downgrade to Free when it expires; existing organizations default to Free when first resolving billing.
+- Product, monthly order, and team creation now enforce plan limits.
+- Billing management is owner-only.
+
+### Migration
+1. Configure `BILLING_PROVIDER=chargily` and both Chargily secrets in production; keep `mock` for local development without payments.
+2. Configure the Chargily webhook URL as `/api/billing/webhook` and use the raw request body for signature verification.
+3. Backfill subscriptions for existing organizations if they should receive a trial or paid plan instead of the default Free plan.
+
 ## Phase 2 — Account lifecycle and authentication
 
 ### Added

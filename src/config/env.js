@@ -17,6 +17,10 @@ const envSchema = z.object({
     EMAIL_PROVIDER: z.enum(["console", "mock", "resend"]).default("console"),
     EMAIL_FROM: z.string().email().default("onboarding@resend.dev"),
     RESEND_API_KEY: z.string().optional(),
+    BILLING_PROVIDER: z.enum(["mock", "chargily"]).default("mock"),
+    CHARGILY_SECRET_KEY: z.string().optional(),
+    CHARGILY_WEBHOOK_SECRET: z.string().optional(),
+    CHARGILY_BASE_URL: z.string().url().default("https://pay.chargily.net/api/v2"),
     TRUST_PROXY: z.enum(["true", "false"]).default("false").transform((value) => value === "true")
 });
 
@@ -40,6 +44,9 @@ const validateEnv = (source = process.env) => {
     }
     if (result.data.EMAIL_PROVIDER === "resend" && !result.data.RESEND_API_KEY) {
         throw new Error("Invalid environment configuration: RESEND_API_KEY is required for Resend");
+    }
+    if (result.data.BILLING_PROVIDER === "chargily" && (!result.data.CHARGILY_SECRET_KEY || !result.data.CHARGILY_WEBHOOK_SECRET)) {
+        throw new Error("Invalid environment configuration: Chargily secret and webhook keys are required");
     }
 
     return {

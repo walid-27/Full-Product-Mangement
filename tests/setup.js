@@ -12,6 +12,8 @@ process.env.LOG_LEVEL = "silent";
 process.env.EMAIL_PROVIDER = "mock";
 process.env.APP_URL = "http://localhost:5000";
 process.env.AUTH_RATE_LIMIT_MAX = "1000";
+process.env.BILLING_PROVIDER = "mock";
+process.env.CHARGILY_WEBHOOK_SECRET = "test-only-webhook-secret";
 jest.setTimeout(60000);
 
 let replSet;

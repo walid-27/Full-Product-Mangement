@@ -127,4 +127,9 @@ const organization = {
     }
 };
 
-module.exports = { auth, product, inventory, order, dashboard, organization };
+const billing = {
+    checkout: { body: z.object({ plan: z.enum(["pro", "business"]) }) },
+    invoices: { query: z.object({ ...pagination }) }
+};
+
+module.exports = { auth, product, inventory, order, dashboard, organization, billing };
