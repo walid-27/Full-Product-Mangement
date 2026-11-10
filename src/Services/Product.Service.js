@@ -5,8 +5,10 @@ const Product = require("../models/Product");
 const AppError = require("../utils/AppError");
 const escapeRegExp = require("../utils/escapeRegExp");
 const Audit = require("./Audit.Service");
+const Plans = require("./Plan.Service");
 
 const createProduct = async (data, file, organization, context) => {
+    await Plans.assertProductCreation(organization);
     if (!file) throw new AppError("check your form ", 400);
     const { name, price, category, stock, lowStockThreshold } = data;
     if (await Product.exists({ name, organization })) {

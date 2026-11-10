@@ -40,6 +40,26 @@ The server listens on `0.0.0.0:5000` by default. Set `TRUST_PROXY=true` only whe
 | `AUTH_RATE_LIMIT_MAX` | No | `10` | Auth requests per IP/window. |
 | `TRUST_PROXY` | No | `false` | Trust the first reverse proxy. |
 
+## Phase 3: billing and plans
+
+New organizations receive a 14-day Pro trial. Subscriptions support `trialing`, `active`, `past_due`, and `canceled`; past-due subscriptions have a seven-day grace period before automatic downgrade to Free. Cancellations take effect at the current period end.
+
+| Plan | Products | Orders/month | Team members | API / CSV / reports |
+| --- | ---: | ---: | ---: | --- |
+| Free | 25 | 50 | 2 | No |
+| Pro | 1,000 | 5,000 | 10 | Yes |
+| Business | Unlimited | Unlimited | Unlimited | Yes |
+
+Creation beyond a limit returns `402 UPGRADE_REQUIRED`. Monthly order usage is stored per organization/month and incremented atomically with order creation. `requireFeature` gates API access, CSV export, and report features for their respective routes.
+
+Owner-only billing endpoints are under `/api/billing`: `GET /subscription`, `GET /usage`, `POST /checkout`, `POST /portal`, `POST /cancel`, and `GET /invoices`.
+
+### Chargily Pay
+
+Set `BILLING_PROVIDER=chargily`, `CHARGILY_SECRET_KEY`, and `CHARGILY_WEBHOOK_SECRET`. Checkout uses Chargily's `/checkouts` API with DZD amounts. `POST /api/billing/webhook` reads the raw body and verifies the `signature` header using HMAC-SHA512 before processing events idempotently.
+
+Chargily does not provide the Stripe-style hosted subscription portal assumed by the generic requirements, so the portal endpoint returns `APP_URL/billing`; this API owns cancellation and subscription state. Paid webhooks activate the plan and mark the invoice paid, failed/expired events start the grace period, and canceled events downgrade to Free. Billing emails cover receipts, failed payments, and trial-ending reminders.
+
 ## Phase 2: account lifecycle and authentication
 
 - Registration sends a 24-hour, single-use email-verification link. New users must verify before accessing organization data; legacy users without a verification field remain accessible during migration.
