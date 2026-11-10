@@ -208,11 +208,13 @@ const updateOrderStatus = async (orderId, userId, data) => {
         throw new AppError("Order status changed; please retry", 409);
     }
 
+
     return {
         message: "the status has been updated",
         findOrderAndUpdateStatus: updatedOrder
     };
 };
+
 
 const CancelOrder = async (orderId, ownerId) => {
     const order = await Order.findOne({ _id: orderId, owner: ownerId });
@@ -240,6 +242,7 @@ const CancelOrder = async (orderId, ownerId) => {
                 );
             }
 
+
             const updatedOrder = await Order.findOneAndUpdate(
                 {
                     _id: orderId,
@@ -256,6 +259,8 @@ const CancelOrder = async (orderId, ownerId) => {
 
             return updatedOrder;
         });
+
+
 
         return {
             message: "the order has been cancelled",
