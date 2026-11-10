@@ -40,6 +40,19 @@ The server listens on `0.0.0.0:5000` by default. Set `TRUST_PROXY=true` only whe
 | `AUTH_RATE_LIMIT_MAX` | No | `10` | Auth requests per IP/window. |
 | `TRUST_PROXY` | No | `false` | Trust the first reverse proxy. |
 
+## Phase 2: account lifecycle and authentication
+
+- Registration sends a 24-hour, single-use email-verification link. New users must verify before accessing organization data; legacy users without a verification field remain accessible during migration.
+- `POST /auth/resend-verification` invalidates earlier verification links.
+- `POST /auth/forgot-password` is non-enumerating and sends a one-hour reset link. `POST /auth/reset-password` accepts it once and revokes every refresh session.
+- Access tokens expire after 15 minutes. Login, registration, and refresh set a 30-day opaque refresh token in an `httpOnly`, `sameSite=strict` cookie (secure in production).
+- `POST /auth/refresh` rotates the token and stores only its SHA-256 hash. Replaying a rotated token revokes its entire token family.
+- `POST /auth/logout` revokes the current token; authenticated `POST /auth/logout-all` revokes every device session.
+- Passwords require 12–72 characters, upper/lowercase letters, a number, and rejection of common passwords. bcrypt uses cost 12.
+- Five failed login attempts lock an account for 15 minutes. Login errors use the same `401` response for unknown users and bad passwords.
+
+Email is provider-agnostic. Set `EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, `EMAIL_FROM`, and `APP_URL` in production. Development defaults to `console`; tests use `mock`. Verification and reset URLs point to `APP_URL` and should be handled by the frontend before submitting the token to the API.
+
 ## Phase 1: multi-tenancy
 
 Every product, order, stock movement, dashboard aggregate, and audit log belongs to an `Organization`. Users access tenants through an active `Membership`; product names are unique per organization rather than per user.

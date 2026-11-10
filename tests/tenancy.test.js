@@ -42,7 +42,7 @@ const orderFor = (organization, product) => Order.create({
 describe("Phase 1 multi-tenancy", () => {
     test("registration atomically creates an organization and owner membership", async () => {
         const response = await request(app).post("/auth/register").send({
-            name: "New Owner", email: "new-owner@example.com", password: "password123"
+            name: "New Owner", email: "new-owner@example.com", password: "SecurePassphrase9"
         }).expect(201);
         const registered = response.body.register;
         const user = await Auth.findOne({ email: registered.email });
