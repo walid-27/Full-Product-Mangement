@@ -11,6 +11,7 @@
   "private": true,
   "scripts": {
     "start": "electron .",
+    "build": "electron-builder --win",
     "dev": "electron . --dev",
     "pack": "electron-builder --dir",
     "dist": "electron-builder --win",
@@ -20,12 +21,15 @@
   },
   "devDependencies": {
     "electron": "45.2.3",
-    "electron-builder": "^26.0.12",
+    "electron-builder": "^26.18.0",
     "jsdom": "^26.1.0"
   },
   "build": {
     "appId": "com.stockflow.desktop",
     "productName": "StockFlow",
+    "win": {
+      "target": "nsis"
+    },
     "copyright": "Copyright © 2026 StockFlow",
     "directories": {
       "output": "release",

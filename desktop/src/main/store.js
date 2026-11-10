@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_CONFIG = {
-  apiBaseUrl: 'http://localhost:5000',
+  apiBaseUrl: 'http://localhost:3000',
   uploadsPath: '/uploads',
   theme: 'dark',
   demoMode: false,
