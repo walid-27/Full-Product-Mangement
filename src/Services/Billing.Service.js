@@ -9,6 +9,7 @@ const Plans = require("./Plan.Service");
 const Email = require("./Email.Service");
 const { getPaymentProvider } = require("./payments");
 const { getPlan } = require("../config/plans");
+const Analytics = require("./Analytics.Service");
 
 const ownerFor = async (organization) => Membership.findOne({ organization, role: "owner", status: "active" }).populate("user");
 const billingAudit = async (organization, context, action, entityId, before, after, session = null) => {
@@ -83,6 +84,7 @@ const handleWebhook = async (rawBody, signature) => {
         await Organization.updateOne({ _id: subscription.organization }, { $set: { plan: subscription.plan } });
         await Invoice.updateOne({ providerCheckoutId: data.id }, { $set: { status: "paid", paidAt: new Date() } });
         if (owner?.user) await Email.sendBillingEmail(owner.user, "receipt", { amountDzd: data.amount, invoiceId: data.id });
+        await Analytics.track("upgrade", { organization: subscription.organization, plan: subscription.plan });
     } else if (["checkout.failed", "checkout.expired"].includes(type)) {
         subscription.status = "past_due";
         subscription.gracePeriodEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -93,6 +95,7 @@ const handleWebhook = async (rawBody, signature) => {
         subscription.plan = "free";
         await Organization.updateOne({ _id: subscription.organization }, { $set: { plan: "free" } });
         await Invoice.updateOne({ providerCheckoutId: data.id }, { $set: { status: "canceled" } });
+        await Analytics.track("churn", { organization: subscription.organization });
     } else {
         return { ignored: true };
     }

@@ -15,5 +15,6 @@ router.get("/", validate(schemas.product.list), Products.getProduct);
 router.get("/analysis", Products.analysisProducts);
 router.patch("/:id", writeAccess, upload.single("image"), validate(schemas.product.update), Products.updateProduct);
 router.delete("/:id", writeAccess, validate(schemas.product.byId), Products.deleteProduct);
+router.post("/:id/restore", writeAccess, validate(schemas.product.byId), Products.restoreProduct);
 
 module.exports = router;

@@ -60,11 +60,12 @@ const sendBillingEmail = async (user, type, details = {}) => {
     const content = {
         paymentFailed: ["Payment failed", "We could not process your payment. Update your billing details during the grace period."],
         trialEnding: ["Your trial is ending", "Your Pro trial ends soon. Choose a plan to keep your paid features."],
-        receipt: ["Payment receipt", `Your payment of ${details.amountDzd || 0} DZD was received. Invoice: ${details.invoiceId || "pending"}.`]
+        receipt: ["Payment receipt", `Your payment of ${details.amountDzd || 0} DZD was received. Invoice: ${details.invoiceId || "pending"}.`],
+        lowStock: ["Low-stock alert", details.message || "A product is running low on stock."]
     }[type];
     await deliver({
         to: user.email, subject: content[0], type,
-        html: template(content[0], user.name, `${loadEnv().APP_URL}/billing`, "Open billing")
+        html: template(content[0], user.name, `${loadEnv().APP_URL}/billing`, "Open billing").replace("<p><a", `<p>${escapeHtml(content[1])}</p><p><a`)
     });
 };
 

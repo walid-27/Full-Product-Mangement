@@ -1,0 +1,13 @@
+const express = require("express");
+const ApiKeys = require("../Controllers/ApiKey.Controller");
+const AuthMiddleware = require("../middleware/AuthMiddleware");
+const resolveTenant = require("../middleware/TenantMiddleware");
+const requireRole = require("../middleware/requireRole");
+const validate = require("../middleware/validate");
+const { apiKeys } = require("../validation/schemas");
+const router = express.Router();
+router.use(AuthMiddleware, resolveTenant, requireRole("owner", "admin"));
+router.post("/", validate(apiKeys.create), ApiKeys.create);
+router.get("/", ApiKeys.list);
+router.delete("/:id", validate(apiKeys.byId), ApiKeys.revoke);
+module.exports = router;

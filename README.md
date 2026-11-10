@@ -115,6 +115,44 @@ npm run migrate:tenancy
 
 The migration creates an owner organization for each legacy `owner`, replaces `owner` with `organization` on products/orders/stock movements, removes the old product-name index, and builds tenant-scoped indexes. Existing users must log in again to receive an `orgId` claim.
 
+## Phases 4–6: platform, integrations, and administration
+
+### Storage, cache, jobs, and observability
+
+Product uploads use magic-byte validation, random names, EXIF rotation, Sharp resizing (maximum 1600×1600), and WebP compression. Local disk is the development/test default; production supports Cloudflare R2 with `STORAGE_DRIVER=r2` and the `R2_*` variables in `.env.example`. `npm run migrate:images` moves existing local images to the configured store.
+
+Set `QUEUE_ENABLED=true` and `REDIS_URL` for BullMQ recurring low-stock, trial, retention, webhook, and GDPR jobs; run `npm run worker` alongside the API. With queues disabled, jobs run locally and cache uses an isolated in-memory TTL store. Product/inventory/order writes invalidate only the affected tenant cache.
+
+`GET /health/live` is a process liveness probe; `GET /health/ready` includes MongoDB readiness. `GET /metrics` exposes Prometheus metrics and Sentry is enabled with `SENTRY_DSN`. HTTP and worker shutdown close connections gracefully. Docker, Compose (Mongo replica set and Redis), CI, and staging configuration are included.
+
+### Features and public API
+
+- Soft-deleted products/orders have audited staff/admin/owner restore endpoints.
+- Products support SKU, barcode, cost price, and size/color variants with atomic variant stock updates.
+- `/api/features` provides per-row CSV imports, CSV/XLSX exports, period sales/profit, best-seller, stock-value, movement reports, PDF invoices/labels, and delivery-provider shipment creation.
+- `/api/account/notifications` manages email/SMS/WhatsApp preferences. SMS and WhatsApp use replaceable provider channels; order status changes use the customer notification adapter.
+- `/api/api-keys` creates hashed, scoped, revocable, per-key-rate-limited keys. The raw key is shown once. Use `x-api-key` on `/api/v1/public/products` and `/api/v1/public/orders`.
+- `/api/webhooks` manages HTTPS outgoing hooks. Deliveries sign `timestamp.rawBody` with `x-saas-timestamp` and `x-saas-signature` (HMAC-SHA256) and retry failures.
+- `/api/search` performs bounded tenant-scoped product/order search. Legacy routes remain available while equivalent versioned routes are under `/api/v1`.
+- Swagger UI is at `/api/docs`; the OpenAPI document is `/api/openapi.json`.
+
+### GDPR, analytics, and super-admin
+
+Account export/deletion and onboarding endpoints are under `/api/account`. Deletion has a 30-day grace period and revokes refresh sessions; the daily purge job finalizes due organizations and anonymizes users. Signup, activation, upgrade, and churn analytics are persisted without secrets.
+
+Super-admin-only `/api/admin` routes list tenants, inspect usage, suspend/restore tenants, and issue audited support impersonation tokens. All tenant middleware rejects suspended/deletion-pending organizations.
+
+### Seeds and disaster recovery
+
+`SEED_PASSWORD=<12+ character password> npm run seed` creates an idempotent demo owner, organization, and product. Backup and restore commands wrap MongoDB Database Tools:
+
+```sh
+npm run backup
+CONFIRM_RESTORE=true npm run restore -- ./backups/<archive>.archive.gz
+```
+
+Restore drops target collections and must first be rehearsed on staging. See `docs/RUNBOOK.md` and `CONTRIBUTING.md`.
+
 ## Tests
 
 ```sh

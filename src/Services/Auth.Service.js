@@ -12,6 +12,7 @@ const Audit = require("./Audit.Service");
 const Account = require("./Account.Service");
 const { generateToken, hashToken } = require("../utils/tokens");
 const { getPasswordErrors } = require("../utils/password");
+const Analytics = require("./Analytics.Service");
 
 const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const DUMMY_HASH = "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.";
@@ -75,6 +76,7 @@ const register = async (data) => {
         await session.endSession();
     }
     await Account.sendVerification(user);
+    await Analytics.track("signup", { organization: organization._id, user: user._id });
     return authResponse(user, organization);
 };
 

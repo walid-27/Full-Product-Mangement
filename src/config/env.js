@@ -21,6 +21,15 @@ const envSchema = z.object({
     CHARGILY_SECRET_KEY: z.string().optional(),
     CHARGILY_WEBHOOK_SECRET: z.string().optional(),
     CHARGILY_BASE_URL: z.string().url().default("https://pay.chargily.net/api/v2"),
+    REDIS_URL: z.string().default("redis://127.0.0.1:6379"),
+    QUEUE_ENABLED: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
+    STORAGE_DRIVER: z.enum(["local", "r2"]).default("local"),
+    R2_ACCOUNT_ID: z.string().optional(),
+    R2_ACCESS_KEY_ID: z.string().optional(),
+    R2_SECRET_ACCESS_KEY: z.string().optional(),
+    R2_BUCKET: z.string().optional(),
+    R2_PUBLIC_URL: z.string().url().optional(),
+    SENTRY_DSN: z.string().optional(),
     TRUST_PROXY: z.enum(["true", "false"]).default("false").transform((value) => value === "true")
 });
 
@@ -47,6 +56,9 @@ const validateEnv = (source = process.env) => {
     }
     if (result.data.BILLING_PROVIDER === "chargily" && (!result.data.CHARGILY_SECRET_KEY || !result.data.CHARGILY_WEBHOOK_SECRET)) {
         throw new Error("Invalid environment configuration: Chargily secret and webhook keys are required");
+    }
+    if (result.data.STORAGE_DRIVER === "r2" && (!result.data.R2_ACCOUNT_ID || !result.data.R2_ACCESS_KEY_ID || !result.data.R2_SECRET_ACCESS_KEY || !result.data.R2_BUCKET)) {
+        throw new Error("Invalid environment configuration: R2 credentials and bucket are required");
     }
 
     return {

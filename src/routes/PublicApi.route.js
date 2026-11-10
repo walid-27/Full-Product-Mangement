@@ -1,0 +1,11 @@
+const express = require("express");
+const ApiKeys = require("../Controllers/ApiKey.Controller");
+const apiKeyAuth = require("../middleware/ApiKeyMiddleware");
+const Plans = require("../Services/Plan.Service");
+const validate = require("../middleware/validate");
+const { product, order } = require("../validation/schemas");
+const router = express.Router();
+router.get("/products", apiKeyAuth("read"), Plans.requireFeature("apiAccess"), validate(product.list), ApiKeys.publicProducts);
+router.get("/orders", apiKeyAuth("read"), Plans.requireFeature("apiAccess"), validate(order.list), ApiKeys.publicOrders);
+router.post("/orders", apiKeyAuth("write"), Plans.requireFeature("apiAccess"), validate(order.create), ApiKeys.publicCreateOrder);
+module.exports = router;

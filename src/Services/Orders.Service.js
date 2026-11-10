@@ -6,6 +6,9 @@ const Inventory = require("./Inventory.Service");
 const Audit = require("./Audit.Service");
 const escapeRegExp = require("../utils/escapeRegExp");
 const Plans = require("./Plan.Service");
+const Cache = require("./Cache.Service");
+const Webhooks = require("./Webhook.Service");
+const Notifications = require("./Notification.Service");
 
 const createOrder = async (data, organization, context) => {
     const { products, userInfo } = data;
@@ -18,31 +21,35 @@ const createOrder = async (data, organization, context) => {
             throw new AppError("Quantity must be a positive integer", 400);
         }
     }
-    const productIds = products.map((item) => item.product);
-    const uniqueIds = new Set(productIds.map((id) => id.toString()));
-    if (uniqueIds.size !== productIds.length) throw new AppError("Duplicate products are not allowed", 400);
+    const productIds = [...new Set(products.map((item) => item.product.toString()))];
+    const orderLines = new Set(products.map((item) => `${item.product}:${item.variantSku || ""}`));
+    if (orderLines.size !== products.length) throw new AppError("Duplicate product/variant lines are not allowed", 400);
 
-    const foundProducts = await Product.find({ organization, _id: { $in: productIds } });
-    if (foundProducts.length !== uniqueIds.size) {
+    const foundProducts = await Product.find({ organization, _id: { $in: productIds }, deletedAt: null });
+    if (foundProducts.length !== productIds.length) {
         throw new AppError("One or more products were not found", 404, "PRODUCT_NOT_FOUND");
     }
     const productById = new Map(foundProducts.map((product) => [product._id.toString(), product]));
     for (const item of products) {
         const product = productById.get(item.product.toString());
-        if (item.quantity > product.stock) throw new AppError(`Insufficient stock for ${product.name}`, 400);
+        const availableStock = item.variantSku
+            ? product.variants.find((variant) => variant.sku === item.variantSku)?.stock
+            : product.stock;
+        if (availableStock === undefined) throw new AppError("Variant not found", 404, "VARIANT_NOT_FOUND");
+        if (item.quantity > availableStock) throw new AppError(`Insufficient stock for ${product.name}`, 400);
     }
     const orderProducts = products.map((item) => {
         const product = productById.get(item.product.toString());
-        return { product: product._id, quantity: item.quantity, price: product.price };
+        return { product: product._id, quantity: item.quantity, price: product.price, costPrice: product.costPrice, variantSku: item.variantSku || null };
     });
     const totalPrice = orderProducts.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const session = await mongoose.startSession();
     try {
-        return await session.withTransaction(async () => {
+        const created = await session.withTransaction(async () => {
             await Plans.consumeOrderUsage(organization, session);
             for (const item of orderProducts) {
-                await Inventory.StockOut({ quantity: item.quantity }, item.product, organization, session, context);
+                await Inventory.StockOut({ quantity: item.quantity, variantSku: item.variantSku }, item.product, organization, session, context);
             }
             const [order] = await Order.create([{
                 organization, products: orderProducts, userInfo, totalPrice, status: "pending"
@@ -53,6 +60,9 @@ const createOrder = async (data, organization, context) => {
             }, session);
             return order;
         });
+        await Cache.invalidateOrganization(organization);
+        await Webhooks.dispatch(organization, "order.created", created);
+        return created;
     } finally {
         await session.endSession();
     }
@@ -65,7 +75,7 @@ const getAllOrder = async (organization, querySearch, queryStatus, queryPage, qu
     if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
         throw new AppError("the limit must be between 1 and 100", 400);
     }
-    const filter = { organization };
+    const filter = { organization, deletedAt: null };
     if (querySearch) {
         const safeSearch = escapeRegExp(querySearch);
         filter.$or = [
@@ -85,7 +95,7 @@ const getAllOrder = async (organization, querySearch, queryStatus, queryPage, qu
 
 const getOrderById = async (organization, orderId) => {
     if (!mongoose.isValidObjectId(orderId)) throw new AppError("Invalid order ID", 400);
-    const order = await Order.findOne({ _id: orderId, organization }).lean();
+    const order = await Order.findOne({ _id: orderId, organization, deletedAt: null }).lean();
     if (!order) throw new AppError("Order not found", 404, "ORDER_NOT_FOUND");
     return order;
 };
@@ -108,6 +118,8 @@ const updateOrderStatus = async (orderId, organization, data, context) => {
         organization, ...context, action: "order.status.update", entity: "order",
         entityId: order._id, before, after: updated
     });
+    await Cache.invalidateOrganization(organization);
+    await Notifications.orderStatus(updated, status);
     return { message: "the status has been updated", findOrderAndUpdateStatus: updated };
 };
 
@@ -122,9 +134,9 @@ const CancelOrder = async (orderId, organization, context) => {
 
     const session = await mongoose.startSession();
     try {
-        return await session.withTransaction(async () => {
+        const result = await session.withTransaction(async () => {
             for (const item of order.products) {
-                await Inventory.StockIn({ quantity: item.quantity }, item.product, organization, session, context);
+                await Inventory.StockIn({ quantity: item.quantity, variantSku: item.variantSku }, item.product, organization, session, context);
             }
             const updated = await Order.findOneAndUpdate({
                 _id: orderId, organization, status: order.status
@@ -136,9 +148,31 @@ const CancelOrder = async (orderId, organization, context) => {
             }, session);
             return { message: "the order has been cancelled", CancelOrder: updated };
         });
+        await Cache.invalidateOrganization(organization);
+        return result;
     } finally {
         await session.endSession();
     }
 };
 
-module.exports = { createOrder, getAllOrder, getOrderById, updateOrderStatus, CancelOrder };
+const deleteOrder = async (orderId, organization, context) => {
+    const order = await Order.findOne({ _id: orderId, organization, deletedAt: null });
+    if (!order) throw new AppError("Order not found", 404, "ORDER_NOT_FOUND");
+    const before = order.toObject();
+    order.deletedAt = new Date();
+    await order.save();
+    await Audit.record({ organization, ...context, action: "order.delete", entity: "order", entityId: order._id, before, after: order });
+    await Cache.invalidateOrganization(organization);
+    return order;
+};
+const restoreOrder = async (orderId, organization, context) => {
+    const order = await Order.findOne({ _id: orderId, organization, deletedAt: { $ne: null } });
+    if (!order) throw new AppError("Deleted order not found", 404, "ORDER_NOT_FOUND");
+    const before = order.toObject();
+    order.deletedAt = null;
+    await order.save();
+    await Audit.record({ organization, ...context, action: "order.restore", entity: "order", entityId: order._id, before, after: order });
+    await Cache.invalidateOrganization(organization);
+    return order;
+};
+module.exports = { createOrder, getAllOrder, getOrderById, updateOrderStatus, CancelOrder, deleteOrder, restoreOrder };

@@ -1,6 +1,7 @@
 const  mongoose  = require("mongoose")
 const Product = require("../models/Product")
 const Order = require("../models/Order")
+const Cache = require("./Cache.Service");
 
     const AnalysisProduct = async(organization, Datequery)=>{
 
@@ -142,6 +143,6 @@ const Order = require("../models/Order")
 
 
     module.exports = {
-        AnalysisProduct,
-        AnalysisOrder
+        AnalysisProduct: (organization, date) => Cache.cached(organization, `dashboard:products:${date || "all"}`, () => AnalysisProduct(organization, date)),
+        AnalysisOrder: (organization, date) => Cache.cached(organization, `dashboard:orders:${date || "all"}`, () => AnalysisOrder(organization, date))
     }

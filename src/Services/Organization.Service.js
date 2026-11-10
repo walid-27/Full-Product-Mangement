@@ -185,12 +185,12 @@ const leave = async (organization, membershipId, context) => {
 const deleteOrganization = async (organization, context) => {
     const existing = await Organization.findOne({ _id: organization, status: "active" });
     if (!existing) throw new AppError("Organization not found", 404, "ORGANIZATION_NOT_FOUND");
-    existing.status = "deleted";
+    existing.status = "deletion_pending";
+    existing.deletionScheduledAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     await existing.save();
-    await Membership.updateMany({ organization }, { $set: { status: "suspended" } });
     await Audit.record({
-        organization, ...context, action: "organization.delete", entity: "organization",
-        entityId: organization, before: { status: "active" }, after: { status: "deleted" }
+        organization, ...context, action: "organization.delete.schedule", entity: "organization",
+        entityId: organization, before: { status: "active" }, after: { status: "deletion_pending", deletionScheduledAt: existing.deletionScheduledAt }
     });
 };
 

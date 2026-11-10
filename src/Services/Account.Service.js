@@ -7,6 +7,7 @@ const Email = require("./Email.Service");
 const AppError = require("../utils/AppError");
 const { generateToken, hashToken } = require("../utils/tokens");
 const { getPasswordErrors } = require("../utils/password");
+const Analytics = require("./Analytics.Service");
 
 const issueToken = async (user, type, ttlMs) => {
     const raw = generateToken();
@@ -32,6 +33,7 @@ const verifyEmail = async (rawToken) => {
     }, { $set: { usedAt: new Date() } }, { new: true });
     if (!token) throw new AppError("Verification link is invalid or expired", 400, "VERIFICATION_INVALID");
     await Auth.updateOne({ _id: token.user }, { $set: { emailVerifiedAt: new Date() } });
+    await Analytics.track("activation", { user: token.user });
 };
 
 const resendVerification = async (userId) => {
@@ -76,4 +78,12 @@ const resetPassword = async (rawToken, password) => {
     }
 };
 
-module.exports = { sendVerification, verifyEmail, resendVerification, forgotPassword, resetPassword };
+const updateNotificationPreferences = async (userId, preferences) => {
+    const user = await Auth.findById(userId);
+    if (!user) throw new AppError("User not found", 404, "USER_NOT_FOUND");
+    Object.assign(user.notifications, preferences);
+    await user.save();
+    return user.notifications;
+};
+
+module.exports = { sendVerification, verifyEmail, resendVerification, forgotPassword, resetPassword, updateNotificationPreferences };

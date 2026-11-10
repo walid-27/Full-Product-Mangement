@@ -5,7 +5,9 @@ const OrderSchema = new mongoose.Schema({
     products: [{
         product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
         quantity: { type: Number, required: true, min: 1 },
-        price: { type: Number, required: true, min: 0 }
+        price: { type: Number, required: true, min: 0 },
+        costPrice: { type: Number, min: 0, default: 0 },
+        variantSku: { type: String, default: null }
     }],
     userInfo: {
         name: { type: String, required: true },
@@ -19,6 +21,7 @@ const OrderSchema = new mongoose.Schema({
         delivery: { type: String, required: true, enum: ["Domicile", "Desk"] }
     },
     totalPrice: { type: Number, required: true },
+    deletedAt: { type: Date, default: null },
     status: { type: String, enum: ["cancelled", "delivered", "confirmed", "pending", "shipped"], required: true }
 }, { timestamps: true });
 
