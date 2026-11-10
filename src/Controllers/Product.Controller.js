@@ -1,4 +1,5 @@
 const ProductServices = require("../Services/Product.Service");
+const AppError = require("../utils/AppError");
 
 
 
@@ -15,9 +16,9 @@ const ProductServices = require("../Services/Product.Service");
 
         }catch(err){
             if (err.code === 11000) {
-                throw new AppError("Product already exists", 409);
-                }
-                 next(err)
+                return next(new AppError("Product already exists", 409));
+            }
+            return next(err);
         }
        
     }

@@ -21,14 +21,9 @@ const mongoose = require('mongoose')
             min: 0,
             default: 0
         },
-        minStock:{
-            type:Number,
-            min: 0,
-            default: 5
-        },
         owner: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "AuthModel",
             required: true,}
         ,
         image: {
@@ -51,5 +46,5 @@ productSchema.index(
     { unique: true }
 );  
 
-    Product = mongoose.model("Product", productSchema)
+    const Product = mongoose.model("Product", productSchema)
 module.exports = Product

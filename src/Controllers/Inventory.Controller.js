@@ -28,7 +28,7 @@ const inventory = require("../Services/Inventory.Service")
         
         try{
             const stock = await inventory.stockAlert(  req.user.userId)
-            res.status(201).json({
+            res.status(200).json({
                 low_Quantity: stock
             })
         }catch(err){
@@ -40,7 +40,7 @@ const inventory = require("../Services/Inventory.Service")
         
         try{
             const stock = await inventory.OutStock( req.user.userId)
-            res.status(201).json({
+            res.status(200).json({
                 out_Quantity: stock
             })
         }catch(err){

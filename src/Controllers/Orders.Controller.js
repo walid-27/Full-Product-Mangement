@@ -43,7 +43,7 @@ const Order = require("../Services/Orders.Service")
     const CancelOrder = async(req, res, next)=>{
          try{
                     const orders = await Order.CancelOrder(req.params.id, req.user.userId)
-                    res.status(201).json(orders)
+                    res.status(200).json(orders)
                 }catch(err){
                     next(err)
                 }
