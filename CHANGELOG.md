@@ -1,5 +1,23 @@
 # Changelog
 
+## Phase 2 — Account lifecycle and authentication
+
+### Added
+- Email verification/resend and non-enumerating forgot/reset-password flows with hashed, expiring, single-use tokens.
+- Fifteen-minute access tokens and rotating 30-day refresh cookies with hashed storage, token-family replay detection, logout, and logout-all.
+- Cost-12 bcrypt, common/weak password rejection, per-account login lockout, and Resend/console/mock email transports.
+- Account lifecycle integration tests and security primitive unit tests.
+
+### Breaking changes
+- New registrations require stronger passwords and email verification before organization-data access.
+- Access tokens now expire after 15 minutes instead of 12 hours; clients must use the refresh cookie flow.
+- Login/registration responses no longer expose refresh tokens in JSON; clients must accept cookies on `/auth` requests.
+
+### Migration
+1. Configure `APP_URL`, `EMAIL_PROVIDER`, `EMAIL_FROM`, and `RESEND_API_KEY` when using Resend.
+2. Existing users have no verification field and remain grandfathered; optionally backfill `emailVerifiedAt` for verified accounts.
+3. Update clients to handle `401` refresh requirements, rotating cookies, and `403 EMAIL_NOT_VERIFIED` responses.
+
 ## Phase 1 — Multi-tenancy
 
 ### Added

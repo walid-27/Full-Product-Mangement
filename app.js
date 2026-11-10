@@ -2,6 +2,7 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const pinoHttp = require("pino-http");
+const cookieParser = require("cookie-parser");
 const { randomUUID } = require("crypto");
 const GlobalMiddleware = require("./src/middleware/GlobalMiddleware");
 const NotFoundMiddleware = require("./src/middleware/NotFoundMiddleware");
@@ -36,6 +37,7 @@ const createApp = (options = {}) => {
         next();
     });
     app.use(cors({
+        credentials: true,
         origin(origin, callback) {
             if (!origin || config.CORS_ORIGINS.includes("*") || config.CORS_ORIGINS.includes(origin)) {
                 return callback(null, true);
@@ -47,6 +49,7 @@ const createApp = (options = {}) => {
         }
     }));
     app.use(express.json({ limit: "1mb" }));
+    app.use(cookieParser());
 
     app.use("/health", HealthRoute(options.isDatabaseReady));
     app.use(createRateLimiter({

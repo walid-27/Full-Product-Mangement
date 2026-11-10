@@ -1,4 +1,5 @@
 const { z } = require("zod");
+const { getPasswordErrors } = require("../utils/password");
 
 const objectId = z.string().regex(/^[a-f\d]{24}$/i, "Invalid resource identifier");
 const pagination = {
@@ -7,21 +8,25 @@ const pagination = {
 };
 const orderStatus = z.enum(["cancelled", "delivered", "confirmed", "pending", "shipped"]);
 const idParams = z.object({ id: objectId });
+const strongPassword = z.string().max(72).refine((password) => getPasswordErrors(password).length === 0, {
+    message: "Password must have 12+ characters, uppercase/lowercase letters, a number, and not be common"
+});
+const emailField = z.string().trim().email().max(320).transform((value) => value.toLowerCase());
 
 const auth = {
     register: {
         body: z.object({
             name: z.string().trim().min(2).max(100),
-            email: z.string().trim().email().max(320).transform((value) => value.toLowerCase()),
-            password: z.string().min(8).max(72)
+            email: emailField,
+            password: strongPassword
         })
     },
     login: {
-        body: z.object({
-            email: z.string().trim().email().max(320).transform((value) => value.toLowerCase()),
-            password: z.string().min(1).max(72)
-        })
-    }
+        body: z.object({ email: emailField, password: z.string().min(1).max(72) })
+    },
+    token: { body: z.object({ token: z.string().min(20).max(4096) }) },
+    forgot: { body: z.object({ email: emailField }) },
+    reset: { body: z.object({ token: z.string().min(20).max(4096), password: strongPassword }) }
 };
 
 const product = {

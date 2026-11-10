@@ -13,6 +13,10 @@ const envSchema = z.object({
     RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(15 * 60 * 1000),
     RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
     AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
+    APP_URL: z.string().url().default("http://localhost:5000"),
+    EMAIL_PROVIDER: z.enum(["console", "mock", "resend"]).default("console"),
+    EMAIL_FROM: z.string().email().default("onboarding@resend.dev"),
+    RESEND_API_KEY: z.string().optional(),
     TRUST_PROXY: z.enum(["true", "false"]).default("false").transform((value) => value === "true")
 });
 
@@ -33,6 +37,9 @@ const validateEnv = (source = process.env) => {
 
     if (origins.length === 0) {
         throw new Error("Invalid environment configuration: CORS_ORIGINS cannot be empty");
+    }
+    if (result.data.EMAIL_PROVIDER === "resend" && !result.data.RESEND_API_KEY) {
+        throw new Error("Invalid environment configuration: RESEND_API_KEY is required for Resend");
     }
 
     return {

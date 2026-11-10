@@ -144,7 +144,7 @@ describe("Phase 0 security baseline", () => {
 
         const response = await request(isolatedApp)
             .post("/auth/register")
-            .send({ name: "Test User", email: "test@example.com", password: "password123" })
+            .send({ name: "Test User", email: "test@example.com", password: "SecurePassphrase9" })
             .expect(500);
 
         expect(response.body).toEqual({
