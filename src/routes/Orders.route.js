@@ -14,5 +14,7 @@ router.get("/", validate(schemas.order.list), orders.getAllOrder);
 router.get("/:id", validate(schemas.order.byId), orders.getOrderById);
 router.patch("/status/:id", writeAccess, validate(schemas.order.updateStatus), orders.updateOrderStatus);
 router.patch("/cancel-order/:id", writeAccess, validate(schemas.order.byId), orders.CancelOrder);
+router.delete("/:id", writeAccess, validate(schemas.order.byId), orders.deleteOrder);
+router.post("/:id/restore", writeAccess, validate(schemas.order.byId), orders.restoreOrder);
 
 module.exports = router;

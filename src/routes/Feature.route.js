@@ -1,0 +1,22 @@
+const express = require("express");
+const { z } = require("zod");
+const Features = require("../Controllers/Feature.Controller");
+const AuthMiddleware = require("../middleware/AuthMiddleware");
+const resolveTenant = require("../middleware/TenantMiddleware");
+const requireRole = require("../middleware/requireRole");
+const Plans = require("../Services/Plan.Service");
+const upload = require("../middleware/upload");
+const validate = require("../middleware/validate");
+const { features } = require("../validation/schemas");
+
+const router = express.Router();
+router.use(AuthMiddleware, resolveTenant);
+router.post("/products/import", requireRole("owner", "admin", "staff"), upload.single("file"), Features.importProducts);
+router.get("/export/:type", Plans.requireFeature("csvExport"), validate(features.export), Features.exportData);
+router.get("/reports/sales", Plans.requireFeature("reports"), validate(features.sales), Features.sales);
+router.get("/reports/best-sellers", Plans.requireFeature("reports"), Features.bestSellers);
+router.get("/reports/stock", Plans.requireFeature("reports"), Features.stock);
+router.get("/reports/movements", Plans.requireFeature("reports"), validate(features.movements), Features.movements);
+router.get("/orders/:id/documents/:type", validate(features.document), Features.orderDocument);
+router.post("/orders/:id/shipment", requireRole("owner", "admin", "staff"), validate({ params: z.object({ id: features.byId.params.shape.id }) }), Features.shipment);
+module.exports = router;

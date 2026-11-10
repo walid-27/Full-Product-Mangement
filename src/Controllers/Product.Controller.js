@@ -37,6 +37,11 @@ const deleteProduct = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const restoreProduct = async (req, res, next) => {
+    try { return res.status(200).json(await ProductServices.restoreProduct(req.params.id, req.orgId, req.auditContext)); }
+    catch (err) { return next(err); }
+};
+
 const analysisProducts = async (req, res, next) => {
     try {
         const result = await ProductServices.analysisProducts(req.orgId);
@@ -44,4 +49,4 @@ const analysisProducts = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { createProduct, getProduct, updateProduct, deleteProduct, analysisProducts };
+module.exports = { createProduct, getProduct, updateProduct, deleteProduct, restoreProduct, analysisProducts };

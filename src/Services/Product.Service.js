@@ -1,27 +1,29 @@
 const mongoose = require("mongoose");
-const path = require("path");
-const fs = require("fs");
 const Product = require("../models/Product");
 const AppError = require("../utils/AppError");
 const escapeRegExp = require("../utils/escapeRegExp");
 const Audit = require("./Audit.Service");
 const Plans = require("./Plan.Service");
+const Storage = require("./Storage.Service");
+const Cache = require("./Cache.Service");
 
 const createProduct = async (data, file, organization, context) => {
     await Plans.assertProductCreation(organization);
     if (!file) throw new AppError("check your form ", 400);
-    const { name, price, category, stock, lowStockThreshold } = data;
+    const { name, price, costPrice, category, stock, lowStockThreshold, sku, barcode, variants } = data;
     if (await Product.exists({ name, organization })) {
         throw new AppError("Product already exists", 409, "PRODUCT_EXISTS");
     }
-
+    const image = file.buffer ? await Storage.uploadImage(file, organization) : file.filename;
+    const totalStock = variants?.length ? variants.reduce((sum, variant) => sum + variant.stock, 0) : stock;
     const product = await Product.create({
-        name, price, category, stock, lowStockThreshold, organization, image: file.filename
+        name, price, costPrice, category, stock: totalStock, lowStockThreshold, sku, barcode, variants, organization, image
     });
     await Audit.record({
         organization, ...context, action: "product.create", entity: "product",
         entityId: product._id, after: product
     });
+    await Cache.invalidateOrganization(organization);
     return { message: "the product has been successfully created", Product: product };
 };
 
@@ -33,7 +35,7 @@ const getProduct = async (organization, querySearch, queryCategory, queryPage, q
         throw new AppError("Limit must be between 1 and 50", 400);
     }
 
-    const filter = { organization };
+    const filter = { organization, deletedAt: null };
     if (querySearch) filter.name = { $regex: escapeRegExp(querySearch), $options: "i" };
     if (queryCategory) filter.category = { $regex: escapeRegExp(queryCategory), $options: "i" };
     const allowedSortFields = ["name", "price", "createdAt"];
@@ -49,46 +51,42 @@ const getProduct = async (organization, querySearch, queryCategory, queryPage, q
     };
 };
 
-const removeImage = (filename) => {
-    if (!filename) return;
-    fs.unlink(path.join(__dirname, "../..", "uploads", filename), (err) => {
-        if (err && err.code !== "ENOENT") console.log("image deletion failed", err.message);
-    });
-};
-
 const updateProduct = async (data, file, productId, organization, context) => {
-    const product = await Product.findOne({ _id: productId, organization });
+    const product = await Product.findOne({ _id: productId, organization, deletedAt: null });
     if (!product) throw new AppError("Product not found", 404, "PRODUCT_NOT_FOUND");
     const before = product.toObject();
     const previousImage = product.image;
-    if (file) product.image = file.filename;
-    for (const field of ["name", "price", "category", "lowStockThreshold"]) {
+    if (file) product.image = file.buffer ? await Storage.uploadImage(file, organization) : file.filename;
+    for (const field of ["name", "price", "costPrice", "category", "lowStockThreshold", "sku", "barcode", "variants"]) {
         if (data[field] !== undefined) product[field] = data[field];
     }
+    if (data.variants !== undefined) product.stock = data.variants.reduce((sum, variant) => sum + variant.stock, 0);
     await product.save();
     await Audit.record({
         organization, ...context, action: "product.update", entity: "product",
         entityId: product._id, before, after: product
     });
-    if (file && previousImage !== file.filename) removeImage(previousImage);
+    if (file && previousImage !== product.image) await Storage.deleteImage(previousImage);
+    await Cache.invalidateOrganization(organization);
     return { message: "the prdouct was successfully updated", product };
 };
 
 const deleteProduct = async (productId, organization, context) => {
-    const product = await Product.findOne({ _id: productId, organization });
+    const product = await Product.findOne({ _id: productId, organization, deletedAt: null });
     if (!product) throw new AppError("Product not found", 404, "PRODUCT_NOT_FOUND");
-    await Product.deleteOne({ _id: productId, organization });
+    product.deletedAt = new Date();
+    await product.save();
     await Audit.record({
         organization, ...context, action: "product.delete", entity: "product",
         entityId: product._id, before: product
     });
-    removeImage(product.image);
+    await Cache.invalidateOrganization(organization);
     return { message: "the product is deleted" };
 };
 
 const analysisProducts = async (organization) => {
     const results = await Product.aggregate([
-        { $match: { organization: new mongoose.Types.ObjectId(organization) } },
+        { $match: { organization: new mongoose.Types.ObjectId(organization), deletedAt: null } },
         { $group: {
             _id: null,
             totalProducts: { $sum: 1 },
@@ -100,4 +98,15 @@ const analysisProducts = async (organization) => {
     return results[0] || { totalProducts: 0, totalStock: 0, totalStockValue: 0, averagePrice: 0 };
 };
 
-module.exports = { createProduct, getProduct, updateProduct, deleteProduct, analysisProducts };
+const restoreProduct = async (productId, organization, context) => {
+    const product = await Product.findOne({ _id: productId, organization, deletedAt: { $ne: null } });
+    if (!product) throw new AppError("Deleted product not found", 404, "PRODUCT_NOT_FOUND");
+    const before = product.toObject();
+    product.deletedAt = null;
+    await product.save();
+    await Audit.record({ organization, ...context, action: "product.restore", entity: "product", entityId: product._id, before, after: product });
+    await Cache.invalidateOrganization(organization);
+    return product;
+};
+
+module.exports = { createProduct, getProduct, updateProduct, deleteProduct, restoreProduct, analysisProducts };

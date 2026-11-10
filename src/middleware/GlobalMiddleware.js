@@ -1,3 +1,5 @@
+const { Sentry } = require("../config/observability");
+
 const normalizeError = (err) => {
     if (err.name === "ValidationError") {
         return {
@@ -46,6 +48,7 @@ function GlobalMiddleware(err, req, res, next) {
     const isProduction = req.app.get("env") === "production";
     const isServerError = normalized.statusCode >= 500;
 
+    if (isServerError) Sentry.captureException(err);
     if (req.log) {
         const log = isServerError ? req.log.error.bind(req.log) : req.log.warn.bind(req.log);
         log({ err, statusCode: normalized.statusCode }, "Request failed");

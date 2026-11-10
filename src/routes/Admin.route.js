@@ -1,0 +1,13 @@
+const express = require("express");
+const AuthMiddleware = require("../middleware/AuthMiddleware");
+const SuperAdmin = require("../middleware/SuperAdminMiddleware");
+const Admin = require("../Services/Admin.Service");
+const validate = require("../middleware/validate");
+const { admin } = require("../validation/schemas");
+const router = express.Router();
+router.use(AuthMiddleware, SuperAdmin);
+router.get("/tenants", validate(admin.list), async (req, res, next) => { try { res.json(await Admin.listTenants(req.query)); } catch (err) { next(err); } });
+router.get("/tenants/:id/usage", validate(admin.byId), async (req, res, next) => { try { res.json(await Admin.usage(req.params.id)); } catch (err) { next(err); } });
+router.patch("/tenants/:id/suspension", validate(admin.suspension), async (req, res, next) => { try { res.json(await Admin.setSuspension(req.params.id, req.body.suspended, { actor: req.user.userId, ip: req.ip })); } catch (err) { next(err); } });
+router.post("/impersonate", validate(admin.impersonate), async (req, res, next) => { try { res.json(await Admin.impersonate(req.superAdmin, req.body.userId, req.body.organizationId, req.ip)); } catch (err) { next(err); } });
+module.exports = router;

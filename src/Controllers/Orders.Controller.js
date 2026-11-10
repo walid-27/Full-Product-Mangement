@@ -34,4 +34,13 @@ const CancelOrder = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { createOrder, getAllOrder, getOrderById, updateOrderStatus, CancelOrder };
+const deleteOrder = async (req, res, next) => {
+    try { return res.status(200).json(await Orders.deleteOrder(req.params.id, req.orgId, req.auditContext)); }
+    catch (err) { return next(err); }
+};
+const restoreOrder = async (req, res, next) => {
+    try { return res.status(200).json(await Orders.restoreOrder(req.params.id, req.orgId, req.auditContext)); }
+    catch (err) { return next(err); }
+};
+
+module.exports = { createOrder, getAllOrder, getOrderById, updateOrderStatus, CancelOrder, deleteOrder, restoreOrder };

@@ -1,0 +1,13 @@
+const express = require("express");
+const Webhooks = require("../Controllers/Webhook.Controller");
+const AuthMiddleware = require("../middleware/AuthMiddleware");
+const resolveTenant = require("../middleware/TenantMiddleware");
+const requireRole = require("../middleware/requireRole");
+const validate = require("../middleware/validate");
+const { webhooks } = require("../validation/schemas");
+const router = express.Router();
+router.use(AuthMiddleware, resolveTenant, requireRole("owner", "admin"));
+router.post("/", validate(webhooks.create), Webhooks.create);
+router.get("/", Webhooks.list);
+router.delete("/:id", validate(webhooks.byId), Webhooks.remove);
+module.exports = router;

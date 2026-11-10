@@ -4,6 +4,7 @@ const InventorySchema = new mongoose.Schema({
     organization: { type: mongoose.Schema.Types.ObjectId, ref: "Organization", required: true },
     product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
     action: { type: String, enum: ["in", "out"], required: true },
+    variantSku: { type: String, default: null },
     quantity: {
         type: Number,
         required: true,
