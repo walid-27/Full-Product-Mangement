@@ -432,7 +432,8 @@
       return;
     }
 
-    const selection = new Map(); // id -> quantity
+    const selection = new Map(); // product id -> quantity
+    const variantSelections = new Map(); // product id -> variant SKU
 
     const body = ui.fromHTML(`
       <div class="form-grid" style="gap:18px">
@@ -509,6 +510,12 @@
     let delivery = 'Domicile';
 
     const catalog = sortedCatalog();
+    const selectedVariant = (product) => {
+      if (!product.variants?.length) return null;
+      const sku = variantSelections.get(product._id) || product.variants.find((variant) => variant.stock > 0)?.sku || product.variants[0].sku;
+      return product.variants.find((variant) => variant.sku === sku) || product.variants[0];
+    };
+    const stockFor = (product) => selectedVariant(product)?.stock ?? Number(product.stock) ?? 0;
 
     function total() {
       let value = 0;
@@ -539,7 +546,7 @@
 
       pickerList.innerHTML = products
         .map((product) => {
-          const stock = Number(product.stock) || 0;
+          const stock = stockFor(product);
           const selected = selection.get(product._id) || 0;
           const disabled = stock <= 0;
           return `
@@ -551,6 +558,7 @@
             disabled ? '<span class="rose">out of stock</span>' : `${num(stock)} available`
           }</div>
               </div>
+              ${product.variants?.length ? `<select class="input input--sm" data-variant aria-label="Variant for ${esc(product.name)}">${product.variants.map((variant) => `<option value="${esc(variant.sku)}" ${selectedVariant(product)?.sku === variant.sku ? 'selected' : ''} ${variant.stock <= 0 ? 'disabled' : ''}>${esc([variant.sku, variant.size, variant.color].filter(Boolean).join(' · '))} (${num(variant.stock)})</option>`).join('')}</select>` : ''}
               <div class="stepper">
                 <button type="button" data-step="-1" ${selected <= 0 ? 'disabled' : ''}>${App.icon('minus', 12)}</button>
                 <input type="number" value="${selected}" min="0" max="${stock}" data-qty ${disabled ? 'disabled' : ''} />
@@ -566,7 +574,7 @@
       pickerList.querySelectorAll('.picker__item').forEach((row) => {
         const product = state.names.get(row.getAttribute('data-pid'));
         if (!product) return;
-        const stock = Number(product.stock) || 0;
+        const stock = stockFor(product);
         const qtyInput = row.querySelector('[data-qty]');
 
         const apply = (value) => {
@@ -586,6 +594,16 @@
 
         qtyInput.addEventListener('click', (event) => event.stopPropagation());
         qtyInput.addEventListener('change', () => apply(Number(qtyInput.value) || 0));
+        const variantInput = row.querySelector('[data-variant]');
+        if (variantInput) {
+          variantInput.addEventListener('click', (event) => event.stopPropagation());
+          variantInput.addEventListener('change', () => {
+            variantSelections.set(product._id, variantInput.value);
+            selection.delete(product._id);
+            renderPicker();
+            renderSummary();
+          });
+        }
 
         row.addEventListener('click', () => {
           if (stock <= 0) return;
@@ -602,7 +620,8 @@
         .map(([id, qty]) => {
           const product = state.names.get(String(id));
           if (!product) return '';
-          return `<div class="summary__line"><span>${esc(product.name)} × ${num(qty)}</span><span>${money(
+          const variant = selectedVariant(product);
+          return `<div class="summary__line"><span>${esc(product.name)}${variant ? ` · ${esc(variant.sku)}` : ''} × ${num(qty)}</span><span>${money(
             Number(product.price) * qty
           )}</span></div>`;
         })
@@ -661,7 +680,11 @@
 
       ui.setBusy(submit, true);
       try {
-        const products = Array.from(selection.entries()).map(([id, quantity]) => ({ product: id, quantity }));
+        const products = Array.from(selection.entries()).map(([id, quantity]) => {
+          const product = state.names.get(String(id));
+          const variant = product && selectedVariant(product);
+          return { product: id, quantity, ...(variant ? { variantSku: variant.sku } : {}) };
+        });
         const created = await App.api.orders.create({
           products,
           userInfo: { name, number, city, address, delivery }

@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_CONFIG = {
-  apiBaseUrl: 'http://localhost:3000',
+  apiBaseUrl: 'http://localhost:5000',
   uploadsPath: '/uploads',
   theme: 'dark',
   demoMode: false,
@@ -62,7 +62,11 @@ function read() {
     } else if (token.startsWith('raw:')) {
       token = token.slice(4);
     }
-    merged.session = token ? { ...stored, token } : null;
+    let refreshToken = stored.refreshToken || null;
+    if (refreshToken?.startsWith('enc:') && decrypt) {
+      try { refreshToken = decrypt(refreshToken.slice(4)); } catch (err) { refreshToken = null; }
+    } else if (refreshToken?.startsWith('raw:')) refreshToken = refreshToken.slice(4);
+    merged.session = token ? { ...stored, token, refreshToken } : null;
   }
 
   return merged;
@@ -81,7 +85,14 @@ function serialize() {
         stored = `raw:${token}`;
       }
     }
-    copy.session = { ...config.session, token: stored };
+    let storedRefresh = config.session.refreshToken ? `raw:${config.session.refreshToken}` : null;
+    if (config.session.refreshToken && encrypt) {
+      try {
+        const sealed = encrypt(config.session.refreshToken);
+        if (sealed) storedRefresh = `enc:${sealed}`;
+      } catch (err) { /* best-effort OS encryption */ }
+    }
+    copy.session = { ...config.session, token: stored, refreshToken: storedRefresh };
   }
   return copy;
 }

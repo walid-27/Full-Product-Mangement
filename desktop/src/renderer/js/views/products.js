@@ -18,6 +18,7 @@
 
   let listHost = null;
   let searchInput = null;
+  const canWrite = () => App.state.session?.role !== 'viewer';
 
   /* ------------------------------------------------------------- loading */
 
@@ -98,7 +99,7 @@
               ${ui.thumb(product)}
               <div class="cell-main__text">
                 <div class="cell-title">${esc(product.name)}</div>
-                <div class="cell-sub">${low ? '<span class="rose">Out of stock</span>' : `Updated ${esc(timeAgo(product.updatedAt))}`}</div>
+                <div class="cell-sub">${esc(product.sku || product.barcode || (low ? 'Out of stock' : `Updated ${timeAgo(product.updatedAt)}`))}</div>
               </div>
             </div>
           </td>
@@ -107,10 +108,10 @@
           <td>${stockCell(product)}</td>
           <td class="right mute small nowrap">${esc(dateShort(product.createdAt))}</td>
           <td class="actions">
-            <div class="row-actions">
+            <div class="row-actions">${canWrite() ? `
               <button class="iconbtn" type="button" data-act="stock" title="Adjust stock">${App.icon('layers', 15)}</button>
               <button class="iconbtn" type="button" data-act="edit" title="Edit product">${App.icon('edit', 15)}</button>
-              <button class="iconbtn is-danger" type="button" data-act="delete" title="Delete product">${App.icon('trash', 15)}</button>
+              <button class="iconbtn is-danger" type="button" data-act="delete" title="Delete product">${App.icon('trash', 15)}</button>` : '<span class="mute small">Read only</span>'}
             </div>
           </td>
         </tr>`;
@@ -196,14 +197,14 @@
           if (action === 'delete') removeProduct(product);
         });
       });
-      row.addEventListener('dblclick', () => openForm(product));
+      if (canWrite()) row.addEventListener('dblclick', () => openForm(product));
     });
   }
 
   async function removeProduct(product) {
     const confirmed = await ui.confirm({
       title: 'Delete this product?',
-      message: `“${product.name}” will be removed from the catalogue. This cannot be undone.`,
+      message: `“${product.name}” will be hidden from the catalogue. An administrator can restore it later.`,
       confirmText: 'Delete product',
       danger: true
     });
@@ -259,6 +260,14 @@
               ${state.categories.map((category) => `<option value="${esc(category)}"></option>`).join('')}
             </datalist>
           </label>
+        </div>
+
+        <div class="form-grid">
+          <label class="field"><span class="field__label">SKU</span><input class="input" name="sku" maxlength="100" value="${esc(product?.sku || '')}" /></label>
+          <label class="field"><span class="field__label">Barcode</span><input class="input" name="barcode" maxlength="100" value="${esc(product?.barcode || '')}" /></label>
+          <label class="field"><span class="field__label">Cost price (DZD)</span><input class="input" name="costPrice" type="number" min="0" step="0.01" value="${esc(product?.costPrice ?? 0)}" /></label>
+          <label class="field"><span class="field__label">Low-stock threshold</span><input class="input" name="lowStockThreshold" type="number" min="0" step="1" value="${esc(product?.lowStockThreshold ?? 5)}" /></label>
+          <label class="field span-2"><span class="field__label">Variants (optional JSON)</span><textarea class="input" name="variants" rows="3" placeholder='[{"sku":"TSHIRT-M","size":"M","color":"Black","stock":10}]'>${esc(product?.variants?.length ? JSON.stringify(product.variants) : '')}</textarea><span class="field__hint">Unique SKU, optional size/color, and non-negative stock. Parent stock is calculated automatically.</span></label>
         </div>
 
         ${
@@ -357,6 +366,14 @@
       const name = form.elements.name.value.trim();
       const price = Number(form.elements.price.value);
       const category = form.elements.category.value.trim();
+      const variantsText = form.elements.variants.value.trim();
+      let variants;
+      if (variantsText) {
+        try {
+          variants = JSON.parse(variantsText);
+          if (!Array.isArray(variants)) throw new Error('not-array');
+        } catch (error) { return showError('Variants must be a valid JSON array.'); }
+      }
 
       if (!name || name.length < 3) return showError('Please give the product a name of at least 3 characters.');
       if (!Number.isFinite(price) || price <= 0) return showError('The price must be a number greater than 0.');
@@ -377,7 +394,14 @@
           };
         }
 
-        const fields = { name, price, category };
+        const fields = {
+          name, price, category,
+          sku: form.elements.sku.value.trim(),
+          barcode: form.elements.barcode.value.trim(),
+          costPrice: Number(form.elements.costPrice.value || 0),
+          lowStockThreshold: Number(form.elements.lowStockThreshold.value || 0)
+        };
+        if (variants) fields.variants = JSON.stringify(variants);
 
         if (editing) {
           const result = await App.api.products.update(product._id, fields, filePayload);

@@ -10,10 +10,14 @@
     { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
     { id: 'products', label: 'Products', icon: 'box' },
     { id: 'inventory', label: 'Inventory', icon: 'layers' },
-    { id: 'orders', label: 'Orders', icon: 'receipt' }
+    { id: 'orders', label: 'Orders', icon: 'receipt' },
+    { id: 'reports', label: 'Reports', icon: 'grid' }
   ];
 
-  const BOTTOM_ROUTES = [{ id: 'settings', label: 'Settings', icon: 'gear' }];
+  const BOTTOM_ROUTES = [
+    { id: 'team', label: 'Team', icon: 'user' },
+    { id: 'settings', label: 'Settings', icon: 'gear' }
+  ];
 
   App.state = App.state || {
     route: 'dashboard',
@@ -23,7 +27,8 @@
     catalog: [],
     orders: [],
     lowStock: [],
-    outOfStock: []
+    outOfStock: [],
+    organizations: []
   };
 
   let navigating = false;
@@ -173,11 +178,32 @@
     if (!chip) return;
     const session = App.state.session || {};
     const name = session.name || session.email || 'Manager';
+    const organizations = App.state.organizations || [];
+    const organizationControl = organizations.length > 1
+      ? `<select class="input input--sm" data-org-switch aria-label="Active organization">${organizations.map((org) => `<option value="${esc(org.id)}" ${org.id === session.orgId ? 'selected' : ''}>${esc(org.name)} · ${esc(org.role)}</option>`).join('')}</select>`
+      : `<span class="userchip__mail">${esc(session.orgName || organizations[0]?.name || session.email || '')}</span>`;
     chip.innerHTML = `${ui.avatar(name, true)}<span class="userchip__meta">
-        <span class="userchip__name">${esc(name)}</span>
-        <span class="userchip__mail">${esc(session.email || (session.demo ? 'demo workspace' : ''))}</span>
-      </span>`;
-    chip.addEventListener('click', () => App.go('settings'));
+        <span class="userchip__name">${esc(name)}</span>${organizationControl}</span>`;
+    chip.addEventListener('click', (event) => { if (!event.target.closest('[data-org-switch]')) App.go('settings'); });
+    const selector = chip.querySelector('[data-org-switch]');
+    if (selector) selector.addEventListener('change', async () => {
+      selector.disabled = true;
+      try {
+        const result = await App.api.organizations.switch(selector.value);
+        App.state.session = result.session;
+        App.state.session.orgName = result.organization.name;
+        App.state.session.role = (App.state.organizations.find((org) => org.id === selector.value) || {}).role;
+        App.state.catalog = [];
+        App.state.orders = [];
+        showShell();
+        await go('dashboard');
+        refreshNavCounts();
+        ui.toast(`Switched to ${result.organization.name}`, 'success');
+      } catch (error) {
+        ui.toast(error.message, 'error');
+        selector.value = App.state.session.orgId;
+      } finally { selector.disabled = false; }
+    });
   }
 
   /* --------------------------------------------------------------- router */
@@ -288,6 +314,14 @@
     } catch (error) {
       App.state.config = App.state.config || {};
     }
+    try {
+      App.state.organizations = await App.api.organizations.list();
+      const active = App.state.organizations.find((org) => org.id === App.state.session.orgId) || App.state.organizations[0];
+      if (active) {
+        App.state.session.orgName = active.name;
+        App.state.session.role = active.role;
+      }
+    } catch (error) { App.state.organizations = []; }
     showShell();
     startPolling();
     await go('dashboard');

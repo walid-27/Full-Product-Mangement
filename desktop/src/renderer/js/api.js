@@ -35,7 +35,7 @@
 
   const productApi = {
     list(query) {
-      return raw({ method: 'GET', path: '/api/product', query });
+      return raw({ method: 'GET', path: '/api/v1/products', query });
     },
 
     async all(options) {
@@ -67,7 +67,7 @@
     async create(fields, file) {
       const data = await raw({
         method: 'POST',
-        path: '/api/product',
+        path: '/api/v1/products',
         form: { fields, file: file || undefined }
       });
       const product = (data && data.product && (data.product.Product || data.product.product)) || null;
@@ -77,43 +77,47 @@
     async update(id, fields, file) {
       return raw({
         method: 'PATCH',
-        path: `/api/product/${encodeURIComponent(id)}`,
+        path: `/api/v1/products/${encodeURIComponent(id)}`,
         form: { fields, file: file || undefined }
       });
     },
 
     remove(id) {
-      return raw({ method: 'DELETE', path: `/api/product/${encodeURIComponent(id)}` });
+      return raw({ method: 'DELETE', path: `/api/v1/products/${encodeURIComponent(id)}` });
+    },
+
+    restore(id) {
+      return raw({ method: 'POST', path: `/api/v1/products/${encodeURIComponent(id)}/restore` });
     },
 
     analysis() {
-      return raw({ method: 'GET', path: '/api/product/analysis' });
+      return raw({ method: 'GET', path: '/api/v1/products/analysis' });
     }
   };
 
   /* ------------------------------------------------------------ inventory */
 
   const inventoryApi = {
-    stockIn(id, quantity) {
+    stockIn(id, quantity, variantSku) {
       return raw({
         method: 'POST',
-        path: `/api/quantity/stock-in/${encodeURIComponent(id)}`,
-        body: { quantity: Number(quantity) }
+        path: `/api/v1/inventory/stock-in/${encodeURIComponent(id)}`,
+        body: { quantity: Number(quantity), ...(variantSku ? { variantSku } : {}) }
       });
     },
-    stockOut(id, quantity) {
+    stockOut(id, quantity, variantSku) {
       return raw({
         method: 'POST',
-        path: `/api/quantity/stock-out/${encodeURIComponent(id)}`,
-        body: { quantity: Number(quantity) }
+        path: `/api/v1/inventory/stock-out/${encodeURIComponent(id)}`,
+        body: { quantity: Number(quantity), ...(variantSku ? { variantSku } : {}) }
       });
     },
     async lowStock() {
-      const data = await raw({ method: 'GET', path: '/api/quantity/low-stock' });
+      const data = await raw({ method: 'GET', path: '/api/v1/inventory/low-stock' });
       return (data && data.low_Quantity) || [];
     },
     async outOfStock() {
-      const data = await raw({ method: 'GET', path: '/api/quantity/out-stock' });
+      const data = await raw({ method: 'GET', path: '/api/v1/inventory/out-stock' });
       return (data && data.out_Quantity) || [];
     }
   };
@@ -128,7 +132,7 @@
   const orderApi = {
     async list(query) {
       try {
-        const data = await raw({ method: 'GET', path: '/api/order', query });
+        const data = await raw({ method: 'GET', path: '/api/v1/orders', query });
         return (data && data.Orders) || EMPTY_ORDERS(query && query.page, query && query.limit);
       } catch (error) {
         // The API answers 404 when there are no orders — that is "empty", not an error.
@@ -158,19 +162,19 @@
     },
 
     async get(id) {
-      const data = await raw({ method: 'GET', path: `/api/order/${encodeURIComponent(id)}` });
+      const data = await raw({ method: 'GET', path: `/api/v1/orders/${encodeURIComponent(id)}` });
       return (data && data.Order) || data;
     },
 
     async create(payload) {
-      const data = await raw({ method: 'POST', path: '/api/order', body: payload });
+      const data = await raw({ method: 'POST', path: '/api/v1/orders', body: payload });
       return (data && data.new_Order) || data;
     },
 
     setStatus(id, status) {
       return raw({
         method: 'PATCH',
-        path: `/api/order/status/${encodeURIComponent(id)}`,
+        path: `/api/v1/orders/status/${encodeURIComponent(id)}`,
         body: { status }
       });
     },
@@ -178,8 +182,12 @@
     cancel(id) {
       return raw({
         method: 'PATCH',
-        path: `/api/order/cancel-order/${encodeURIComponent(id)}`
+        path: `/api/v1/orders/cancel-order/${encodeURIComponent(id)}`
       });
+    },
+
+    restore(id) {
+      return raw({ method: 'POST', path: `/api/v1/orders/${encodeURIComponent(id)}/restore` });
     }
   };
 
@@ -250,6 +258,30 @@
     products: productApi,
     inventory: inventoryApi,
     orders: orderApi,
+    organizations: {
+      list: () => raw({ method: 'GET', path: '/api/organizations' }),
+      async switch(id) {
+        const result = await bridge().switchOrganization(id);
+        if (!result.ok) throw new ApiError(result);
+        return result;
+      },
+      members: () => raw({ method: 'GET', path: '/api/organizations/members' }),
+      invite: (email, role) => raw({ method: 'POST', path: '/api/organizations/invites', body: { email, role } }),
+      removeMember: (id) => raw({ method: 'DELETE', path: `/api/organizations/members/${encodeURIComponent(id)}` }),
+      changeRole: (id, role) => raw({ method: 'PATCH', path: `/api/organizations/members/${encodeURIComponent(id)}/role`, body: { role } }),
+      auditLogs: (query) => raw({ method: 'GET', path: '/api/organizations/audit-logs', query })
+    },
+    reports: {
+      sales: (period) => raw({ method: 'GET', path: '/api/v1/features/reports/sales', query: { period } }),
+      bestSellers: () => raw({ method: 'GET', path: '/api/v1/features/reports/best-sellers' }),
+      stock: () => raw({ method: 'GET', path: '/api/v1/features/reports/stock' }),
+      movements: (query) => raw({ method: 'GET', path: '/api/v1/features/reports/movements', query })
+    },
+    account: {
+      onboarding: () => raw({ method: 'GET', path: '/api/account/onboarding' }),
+      notifications: (preferences) => raw({ method: 'PATCH', path: '/api/account/notifications', body: preferences })
+    },
+    search: (q, limit) => raw({ method: 'GET', path: '/api/v1/search', query: { q, limit } }),
 
     images: {
       resolve: resolveImage,
