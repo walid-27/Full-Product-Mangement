@@ -30,6 +30,8 @@ const SCRIPTS = [
   'js/views/products.js',
   'js/views/inventory.js',
   'js/views/orders.js',
+  'js/views/reports.js',
+  'js/views/team.js',
   'js/views/settings.js',
   'js/app.js'
 ];
@@ -297,7 +299,7 @@ async function closeModals() {
     assert.strictEqual($('#auth').hidden, true);
     assert.strictEqual($('#mode-badge').hidden, false, 'demo badge visible');
     assert.strictEqual(text('#view .stat .stat__value'), '16', 'seeded product count');
-    assert.strictEqual($$('#nav-main [data-route]').length, 4);
+    assert.strictEqual($$('#nav-main [data-route]').length, 5);
     assert.match(text('#userchip'), /Demo Manager/);
   });
 
@@ -307,6 +309,18 @@ async function closeModals() {
     assert.ok($$('#view tbody tr').length >= 4, 'recent orders + restock rows');
     assert.match(text('#view'), /Recent orders/);
     assert.match(text('#view'), /Needs restocking/);
+  });
+
+  await test('renders server reports and organization team', async () => {
+    click($('[data-route="reports"]'));
+    await wait(150);
+    if (!text('#view').includes('Best-selling products')) assert.fail(text('#view'));
+    await waitFor(() => text('#view').includes('Best-selling products'), 'reports page');
+    assert.match(text('#view'), /12 500|12,500/);
+    assert.match(text('#view'), /Casque Bluetooth Pro/);
+    click($('[data-route="team"]'));
+    await waitFor(() => text('#view').includes('Demo Manager'), 'team page');
+    assert.match(text('#view'), /owner/);
   });
 
   await test('navigates to products, paginates and searches', async () => {
@@ -474,13 +488,17 @@ async function closeModals() {
 
     click($('.drawer [data-status]'));
     await waitFor(() => $('.modal'), 'status modal');
-    click($('.modal [data-status="shipped"]'));
+    const currentStatus = $('.modal [data-status][disabled]').getAttribute('data-status');
+    const nextStatus = { pending: 'confirmed', confirmed: 'shipped', shipped: 'delivered' }[currentStatus];
+    click($(`.modal [data-status="${nextStatus}"]`));
+    await wait(100);
+    if ($('#status-error') && !$('#status-error').hidden) assert.fail(text('#status-error'));
     await waitFor(() => !$('.modal'), 'status modal closed');
     await waitFor(() => !$('.drawer'), 'drawer closed');
 
     const updated = mock.state().orders.find((order) => String(order._id).endsWith(shortId.toLowerCase()) || String(order._id).slice(-6).toUpperCase() === shortId);
     assert.ok(updated, 'order found by its short id');
-    assert.strictEqual(updated.status, 'shipped', 'status persisted');
+    assert.strictEqual(updated.status, nextStatus, 'status persisted');
   });
 
   await test('filters orders by status', async () => {

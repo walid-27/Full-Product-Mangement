@@ -362,7 +362,9 @@
 
   function openStockModal(product, direction, onDone) {
     let mode = direction === 'out' ? 'out' : 'in';
-    const initialStock = Number(product.stock) || 0;
+    const parentStock = Number(product.stock) || 0;
+    let initialStock = product.variants?.length ? Number(product.variants[0].stock) || 0 : parentStock;
+    let variantSku = product.variants?.[0]?.sku || null;
 
     const body = ui.fromHTML(`
       <div class="col" style="gap:14px">
@@ -385,6 +387,7 @@
           </button>
         </div>
 
+        ${product.variants?.length ? `<label class="field"><span class="field__label">Variant</span><select class="input" id="stock-variant">${product.variants.map((variant) => `<option value="${esc(variant.sku)}">${esc([variant.sku, variant.size, variant.color].filter(Boolean).join(' · '))} · ${num(variant.stock)} units</option>`).join('')}</select></label>` : ''}
         <label class="field">
           <span class="field__label">Quantity</span>
           <div class="row" style="gap:8px">
@@ -497,6 +500,13 @@
     });
 
     qtyInput.addEventListener('input', sync);
+    const variantInput = body.querySelector('#stock-variant');
+    if (variantInput) variantInput.addEventListener('change', () => {
+      variantSku = variantInput.value;
+      const variant = product.variants.find((item) => item.sku === variantSku);
+      initialStock = Number(variant?.stock) || 0;
+      sync();
+    });
     foot.querySelector('[data-cancel]').addEventListener('click', () => ref.close());
 
     submit.addEventListener('click', async () => {
@@ -507,19 +517,19 @@
 
       try {
         const result = mode === 'in'
-          ? await App.api.inventory.stockIn(product._id, qty)
-          : await App.api.inventory.stockOut(product._id, qty);
+          ? await App.api.inventory.stockIn(product._id, qty, variantSku)
+          : await App.api.inventory.stockOut(product._id, qty, variantSku);
 
         const movement = (result && result.new_Quantity) || {};
         const stockAfter = Number(movement.stockAfter);
-        const finalStock = Number.isFinite(stockAfter) ? stockAfter : mode === 'in' ? initialStock + qty : initialStock - qty;
+        const finalStock = Number.isFinite(stockAfter) ? stockAfter : mode === 'in' ? parentStock + qty : parentStock - qty;
 
         addActivity({
           productId: product._id,
           productName: product.name,
           action: mode,
           quantity: qty,
-          stockBefore: initialStock,
+          stockBefore: parentStock,
           stockAfter: finalStock
         });
 

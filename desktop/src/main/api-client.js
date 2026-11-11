@@ -72,7 +72,10 @@ async function parseResponse(response, startedAt) {
     contentType,
     data,
     ms,
-    url: response.url
+    url: response.url,
+    cookies: typeof response.headers.getSetCookie === 'function'
+      ? response.headers.getSetCookie()
+      : (response.headers.get('set-cookie') ? [response.headers.get('set-cookie')] : [])
   };
 }
 
@@ -98,11 +101,12 @@ async function request(options) {
     query,
     body,
     form,
+    headers: extraHeaders,
     timeout = DEFAULT_TIMEOUT
   } = options || {};
 
   const url = `${joinUrl(baseUrl, apiPath)}${buildQuery(query)}`;
-  const headers = { Accept: 'application/json' };
+  const headers = { Accept: 'application/json', ...(extraHeaders || {}) };
   if (token) headers.Authorization = `Bearer ${token}`;
 
   let payload;

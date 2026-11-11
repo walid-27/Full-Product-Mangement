@@ -2,6 +2,10 @@
 
 Express 5, Mongoose 9, MongoDB, JWT, and multer API for products, inventory, and orders.
 
+## Windows desktop client
+
+The `desktop/` folder contains StockFlow, a secure Electron client ready for this API. It supports automatic token refresh, organization switching, role-aware product/inventory/order workflows, variants, reports, and team invitations. Run `cd desktop && npm ci && npm start`, or see `desktop/README.md` for demo mode, tests, and Windows installer instructions. Desktop CI builds installer and portable artifacts.
+
 ## Phase 0: security baseline
 
 - Helmet security headers and configurable CORS origins.

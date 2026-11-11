@@ -73,10 +73,6 @@ function decodeJwt(token) {
 function currentSession() {
   const session = store.getSession();
   if (!session || !session.token) return null;
-  if (session.exp && session.exp * 1000 < Date.now()) {
-    store.clearSession();
-    return null;
-  }
   return session;
 }
 
@@ -87,6 +83,9 @@ function publicSession() {
     name: session.name || '',
     email: session.email || '',
     exp: session.exp || null,
+    orgId: session.orgId || null,
+    orgName: session.orgName || '',
+    role: session.role || '',
     apiBaseUrl: session.apiBaseUrl || '',
     demo: Boolean(session.demo)
   };
@@ -101,6 +100,56 @@ function imageOptions() {
   return { baseUrl: config.apiBaseUrl, uploadsPath: uploads };
 }
 
+function refreshCookie(result) {
+  const cookie = (result.cookies || []).find((value) => /^refreshToken=/.test(value));
+  if (!cookie) return null;
+  const token = cookie.split(';')[0].slice('refreshToken='.length);
+  return token ? decodeURIComponent(token) : null;
+}
+
+function saveAuthResult(result, fallback) {
+  const payload = (result.data && (result.data.register || result.data)) || {};
+  const token = payload.token;
+  if (!token) return null;
+  const decoded = decodeJwt(token) || {};
+  const previous = store.getSession() || {};
+  const session = {
+    ...previous,
+    ...fallback,
+    token,
+    email: payload.email || (fallback && fallback.email) || previous.email,
+    name: payload.name || (fallback && fallback.name) || previous.name,
+    exp: decoded.exp || Math.floor(Date.now() / 1000) + 900,
+    orgId: decoded.orgId || payload.organization?.id || previous.orgId || null,
+    orgName: payload.organization?.name || previous.orgName || '',
+    refreshToken: refreshCookie(result) || previous.refreshToken || null
+  };
+  store.setSession(session);
+  return session;
+}
+
+let refreshing = null;
+async function refreshSession() {
+  if (refreshing) return refreshing;
+  refreshing = (async () => {
+    const config = store.get();
+    const session = store.getSession();
+    if (!session?.refreshToken || config.demoMode) return null;
+    const result = await api.request({
+      baseUrl: config.apiBaseUrl,
+      path: '/auth/refresh',
+      method: 'POST',
+      headers: { Cookie: `refreshToken=${encodeURIComponent(session.refreshToken)}` }
+    });
+    if (!result.ok || !saveAuthResult(result)) {
+      store.clearSession();
+      return null;
+    }
+    return currentSession();
+  })().finally(() => { refreshing = null; });
+  return refreshing;
+}
+
 /* ------------------------------------------------------------ API bridge */
 
 /**
@@ -111,7 +160,10 @@ async function performRequest(options) {
   const opts = options || {};
   const config = store.get();
   const auth = opts.auth !== false;
-  const session = currentSession();
+  let session = currentSession();
+  if (auth && session && !config.demoMode && session.exp * 1000 < Date.now() + 30000) {
+    session = await refreshSession();
+  }
 
   if (auth && !session) {
     return { ok: false, status: 401, data: { message: 'Please sign in to continue.' }, sessionExpired: true };
@@ -150,8 +202,12 @@ async function performRequest(options) {
   }
 
   if (!result.ok) {
+    if (auth && !config.demoMode && result.status === 401 && !opts._retried && session?.refreshToken) {
+      const refreshed = await refreshSession();
+      if (refreshed) return performRequest({ ...opts, _retried: true });
+    }
     const message = api.errorMessage(result);
-    const expired = auth && !config.demoMode && (result.status === 401 || result.status === 403);
+    const expired = auth && !config.demoMode && result.status === 401;
     if (expired && session) store.clearSession();
     return {
       ok: false,
@@ -193,23 +249,13 @@ ipcMain.handle('auth:login', async (_event, credentials) => {
     return { ok: false, status: result.status, error: api.errorMessage(result) };
   }
 
-  const payload = (result.data && (result.data.register || result.data)) || {};
-  const token = payload.token;
-  if (!token) {
-    return { ok: false, error: 'The API answered without a token. Is this the right server?' };
-  }
-
-  const decoded = decodeJwt(token);
-  const session = {
-    token,
-    email: payload.email || email,
-    name: payload.name || '',
-    exp: decoded && decoded.exp ? decoded.exp : Math.floor(Date.now() / 1000) + 12 * 3600,
+  const session = saveAuthResult(result, {
+    email,
+    name: '',
     apiBaseUrl: config.apiBaseUrl,
     demo: Boolean(config.demoMode)
-  };
-  store.setSession(session);
-
+  });
+  if (!session) return { ok: false, error: 'The API answered without a token. Is this the right server?' };
   return { ok: true, session: publicSession() };
 });
 
@@ -222,7 +268,9 @@ ipcMain.handle('auth:register', async (_event, form) => {
   };
 
   if (!body.email || !body.password) return { ok: false, error: 'Email and password are required.' };
-  if (body.password.length < 6) return { ok: false, error: 'Password must contain at least 6 characters.' };
+  if (body.password.length < 12 || !/[a-z]/.test(body.password) || !/[A-Z]/.test(body.password) || !/\d/.test(body.password)) {
+    return { ok: false, error: 'Use 12+ characters with uppercase, lowercase, and a number.' };
+  }
 
   const result = config.demoMode
     ? mockApi.handle({ method: 'POST', path: '/auth/register', body })
@@ -235,8 +283,27 @@ ipcMain.handle('auth:register', async (_event, form) => {
 ipcMain.handle('auth:session', async () => publicSession());
 
 ipcMain.handle('auth:logout', async () => {
+  const config = store.get();
+  const session = currentSession();
+  if (!config.demoMode && session?.refreshToken) {
+    await api.request({
+      baseUrl: config.apiBaseUrl,
+      path: '/auth/logout',
+      method: 'POST',
+      headers: { Cookie: `refreshToken=${encodeURIComponent(session.refreshToken)}` },
+      timeout: 5000
+    });
+  }
   store.clearSession();
   return { ok: true };
+});
+
+ipcMain.handle('org:switch', async (_event, organizationId) => {
+  if (!/^[a-f\d]{24}$/i.test(String(organizationId || ''))) return { ok: false, error: 'Invalid organization.' };
+  const result = await performRequest({ method: 'POST', path: '/api/organizations/switch', body: { organizationId } });
+  if (!result.ok) return result;
+  const session = saveAuthResult({ data: result.data, cookies: [] });
+  return { ok: true, session: publicSession(), organization: result.data.organization, saved: Boolean(session) };
 });
 
 /* ------------------------------------------------------- IPC: requests */

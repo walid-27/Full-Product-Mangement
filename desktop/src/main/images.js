@@ -101,19 +101,27 @@ async function get(filename, options) {
   }
 
   const baseUrl = options && options.baseUrl;
-  if (!baseUrl) return null;
+  if (!baseUrl && !/^https?:\/\//i.test(String(filename))) return null;
 
   const uploadsPath = (options && options.uploadsPath) || '/uploads';
   const suffix = uploadsPath.startsWith('/') ? uploadsPath : `/${uploadsPath}`;
-  const url = `${String(baseUrl).replace(/\/+$/, '')}${suffix.replace(/\/+$/, '')}/${encodeURIComponent(name)}`;
+  let url;
+  if (/^https?:\/\//i.test(String(filename))) {
+    const remote = new URL(String(filename));
+    if (!['http:', 'https:'].includes(remote.protocol)) return null;
+    url = remote.toString();
+  } else {
+    url = `${String(baseUrl).replace(/\/+$/, '')}${suffix.replace(/\/+$/, '')}/${encodeURIComponent(name)}`;
+  }
 
   try {
     const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
     if (!response.ok) return null;
     const type = response.headers.get('content-type') || '';
     if (!type.toLowerCase().startsWith('image/')) return null;
+    if (Number(response.headers.get('content-length')) > 12 * 1024 * 1024) return null;
     const arrayBuffer = await response.arrayBuffer();
-    if (!arrayBuffer.byteLength) return null;
+    if (!arrayBuffer.byteLength || arrayBuffer.byteLength > 12 * 1024 * 1024) return null;
     return put(name, Buffer.from(arrayBuffer));
   } catch (err) {
     return null;

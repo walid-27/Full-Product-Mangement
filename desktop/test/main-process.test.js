@@ -189,6 +189,7 @@ function listen(handler) {
       'auth:register',
       'auth:session',
       'auth:logout',
+      'org:switch',
       'api:request',
       'api:ping',
       'config:get',
@@ -322,18 +323,36 @@ function listen(handler) {
   });
 
   await test('talks to a real HTTP API and reuses the token', async () => {
+    const jwt = (exp, orgId) => `e30.${Buffer.from(JSON.stringify({ exp, orgId })).toString('base64url')}.sig`;
+    const oldToken = jwt(Math.floor(Date.now() / 1000) - 1, '507f1f77bcf86cd799439011');
+    const newToken = jwt(Math.floor(Date.now() / 1000) + 900, '507f1f77bcf86cd799439011');
+    const switchedToken = jwt(Math.floor(Date.now() / 1000) + 900, '507f1f77bcf86cd799439012');
     const { server: local, port } = await listen((request, response) => {
       const url = new URL(request.url, 'http://127.0.0.1');
-      seen.push({ path: url.pathname, auth: request.headers.authorization });
+      seen.push({ path: url.pathname, auth: request.headers.authorization, cookie: request.headers.cookie });
       const json = (status, payload) => {
         response.writeHead(status, { 'Content-Type': 'application/json' });
         response.end(JSON.stringify(payload));
       };
       if (url.pathname === '/auth/login') {
-        return json(200, { register: { name: 'Live Manager', email: 'live@example.com', token: 'aaa.bbb.ccc' } });
+        response.setHeader('Set-Cookie', 'refreshToken=first-refresh; HttpOnly; Path=/');
+        return json(200, { register: { name: 'Live Manager', email: 'live@example.com', token: oldToken } });
       }
+      if (url.pathname === '/auth/refresh') {
+        if (request.headers.cookie !== 'refreshToken=first-refresh') return json(401, { message: 'Invalid refresh' });
+        response.setHeader('Set-Cookie', 'refreshToken=rotated-refresh; HttpOnly; Path=/');
+        return json(200, { register: { name: 'Live Manager', email: 'live@example.com', token: newToken } });
+      }
+      if (url.pathname === '/api/organizations/switch') {
+        return json(200, { token: switchedToken, organization: { _id: '507f1f77bcf86cd799439012', name: 'Second Organization' } });
+      }
+      if (url.pathname === '/r2/product.webp') {
+        response.writeHead(200, { 'Content-Type': 'image/webp' });
+        return response.end(Buffer.from([82, 73, 70, 70]));
+      }
+      if (url.pathname === '/api/forbidden') return json(403, { message: 'Role forbidden' });
       if (url.pathname === '/api/product') {
-        if (request.headers.authorization !== 'Bearer aaa.bbb.ccc') return json(401, { message: 'verife your access' });
+        if (request.headers.authorization !== `Bearer ${newToken}`) return json(401, { message: 'verife your access' });
         return json(200, { products: [], pagnition: { page: 1, limit: 12, total: 0, totalPages: 0 } });
       }
       if (url.pathname === '/api/quantity/low-stock') {
@@ -359,11 +378,35 @@ function listen(handler) {
     assert.strictEqual(list.ok, true, list.error);
     assert.strictEqual(list.data.products.length, 0);
     assert.ok(
-      seen.some((entry) => entry.path === '/api/product' && entry.auth === 'Bearer aaa.bbb.ccc'),
-      'main process should attach the stored JWT'
+      seen.some((entry) => entry.path === '/api/product' && entry.auth === `Bearer ${newToken}`),
+      'main process should rotate an expired token and attach the replacement JWT'
+    );
+    assert.ok(
+      seen.some((entry) => entry.path === '/auth/refresh' && entry.cookie === 'refreshToken=first-refresh'),
+      'main process should send the refresh cookie without exposing it to the renderer'
     );
 
     localServer = local;
+  });
+
+  await test('switches organizations without exposing the replacement token', async () => {
+    const result = await call('org:switch', '507f1f77bcf86cd799439012');
+    assert.strictEqual(result.ok, true, result.error);
+    assert.strictEqual(result.session.orgId, '507f1f77bcf86cd799439012');
+    assert.strictEqual('token' in result.session, false);
+  });
+
+  await test('loads Cloudflare R2 image URLs directly', async () => {
+    const config = await call('config:get');
+    const image = await call('image:get', `${config.apiBaseUrl.startsWith('http') ? config.apiBaseUrl : `http://${config.apiBaseUrl}`}/r2/product.webp`);
+    assert.ok(image && image.startsWith('data:image/webp;base64,'));
+  });
+
+  await test('keeps the session when a role receives 403', async () => {
+    const result = await call('api:request', { method: 'GET', path: '/api/forbidden' });
+    assert.strictEqual(result.status, 403);
+    assert.strictEqual(result.sessionExpired, false);
+    assert.strictEqual((await call('config:get')).hasSession, true);
   });
 
   await test('clears the session when the API answers 401', async () => {

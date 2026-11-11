@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld('desktop', {
   register: (form) => ipcRenderer.invoke('auth:register', form),
   getSession: () => ipcRenderer.invoke('auth:session'),
   logout: () => ipcRenderer.invoke('auth:logout'),
+  switchOrganization: (organizationId) => ipcRenderer.invoke('org:switch', organizationId),
 
   /* API */
   request: (options) => ipcRenderer.invoke('api:request', options),

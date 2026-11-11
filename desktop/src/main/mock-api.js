@@ -617,6 +617,12 @@ function handle(request) {
   const rawPath = String((request && request.path) || '/');
   const pathname = rawPath.split('?')[0].replace(/\/+$/, '') || '/';
   const parts = pathname.split('/').filter(Boolean);
+  if (parts[0] === 'api' && parts[1] === 'v1') {
+    parts.splice(1, 1);
+    if (parts[1] === 'products') parts[1] = 'product';
+    if (parts[1] === 'inventory') parts[1] = 'quantity';
+    if (parts[1] === 'orders') parts[1] = 'order';
+  }
   const query = (request && request.query) || {};
   const body = (request && request.body) || {};
   const form = (request && request.form) || null;
@@ -631,6 +637,19 @@ function handle(request) {
     return request && request.token
       ? fail(403, 'invalid token')
       : fail(401, 'verife your access');
+  }
+
+  if (method === 'GET' && pathname === '/api/organizations') {
+    return ok(200, [{ id: 'demo-org', name: 'Demo Organization', role: 'owner', plan: 'business' }]);
+  }
+
+  if (method === 'GET' && pathname === '/api/organizations/members') {
+    return ok(200, [{ _id: 'demo-membership', role: 'owner', user: { name: 'Demo Manager', email: DEMO_EMAIL } }]);
+  }
+  if (method === 'GET' && parts[0] === 'api' && parts[1] === 'features' && parts[2] === 'reports') {
+    if (parts[3] === 'sales') return ok(200, [{ _id: '2026-11', revenue: 12500, profit: 4200, orders: 3 }]);
+    if (parts[3] === 'best-sellers') return ok(200, [{ name: 'Casque Bluetooth Pro', quantity: 8, revenue: 9600 }]);
+    if (parts[3] === 'stock') return ok(200, { stockValue: 42000, potentialProfit: 13000, lowStock: 2, outOfStock: 1 });
   }
 
   if (parts[0] === 'api' && parts[1] === 'product') {

@@ -3,7 +3,7 @@
 A complete Electron desktop client for the **Full Product Management API** (`walid-27/Full-Product-Mangement`).
 
 Manage products, stock movements and customer orders from a native Windows window instead of a browser —
-with a dashboard, search, pagination, image uploads, low-stock alerts and an order pipeline.
+with dashboards, multi-organization switching, team management, variants, server reports, search, pagination, image uploads, low-stock alerts and an order pipeline.
 
 > This folder is **standalone**. It does not import, patch or require any file from the API repository:
 > it only talks to the API over HTTP. Your backend stays exactly as it is.
@@ -69,7 +69,7 @@ desktop/
 │        └─ app.js        Router, session, window chrome, global shortcuts
 ├─ assets/                App icon (png + ico)
 ├─ preview/               Static HTML snapshots of every screen (open in any browser)
-├─ test/                  77 automated tests (see §7)
+├─ test/                  82 automated tests (see §7)
 ├─ ci/                    GitHub Actions workflow + the preview renderer
 └─ package.json           Scripts + electron-builder configuration
 ```
@@ -151,29 +151,28 @@ so the UI is not affected by browser CORS rules either.
 | --- | --- |
 | Sign in | `POST /auth/login` → `register.token` |
 | Register | `POST /auth/register` |
-| List products | `GET /api/product?search&category&page&limit&sort` |
-| Create product | `POST /api/product` (multipart: `image` + `name`, `price`, `category`) |
-| Update product | `PATCH /api/product/:id` (multipart) |
-| Delete product | `DELETE /api/product/:id` |
-| Stock in / out | `POST /api/quantity/stock-in/:id` · `POST /api/quantity/stock-out/:id` |
-| Alerts | `GET /api/quantity/low-stock` · `GET /api/quantity/out-stock` |
-| Orders | `POST /api/order` · `GET /api/order` · `GET /api/order/:id` |
+| List products | `GET /api/v1/products?search&category&page&limit&sort` |
+| Create product | `POST /api/v1/products` (multipart: `image` + `name`, `price`, `category`) |
+| Update product | `PATCH /api/v1/products/:id` (multipart) |
+| Delete product | `DELETE /api/v1/products/:id` |
+| Stock in / out | `POST /api/v1/inventory/stock-in/:id` · `POST /api/v1/inventory/stock-out/:id` |
+| Alerts | `GET /api/v1/inventory/low-stock` · `GET /api/v1/inventory/out-stock` |
+| Orders | `POST /api/v1/orders` · `GET /api/v1/orders` · `GET /api/v1/orders/:id` |
 | Status / cancel | `PATCH /api/order/status/:id` · `PATCH /api/order/cancel-order/:id` |
 
-Three quirks of the current backend are handled deliberately — no backend change is required:
+The desktop client uses the versioned `/api/v1` product, inventory, order, search, and report endpoints. Authentication uses 15-minute access tokens plus automatic 30-day refresh-cookie rotation. Both tokens remain in the Electron main process and are encrypted at rest when the OS credential store is available.
 
-1. **`src/routes/DashBoard.route.js` is not mounted in `app.js`.** The dashboard therefore computes its
-   figures inside the app from `GET /api/product` and `GET /api/order`. If you later mount the dashboard
-   router, the app keeps working unchanged.
-2. **Uploaded images are not served over HTTP** (there is no `express.static('/uploads')`). Images uploaded
-   from this app are cached locally, so they display instantly. Images created elsewhere fall back to
-   `{API}{uploadsPath}/{file}` and, if unavailable, to a neat initials placeholder.
-3. **`GET /api/order` answers `404` when a page is empty.** The app treats that as “no orders” instead of an error.
-4. **`Product.Service` puts `search` straight into a Mongo `$regex`**, so a character like `(` makes the query fail.
-   The app escapes regex metacharacters in the product search before sending them.
+**New backend capabilities**
 
-Also note: the backend's international phone pattern accepts `+213` followed by **8** digits while local
-numbers use `0[567]` + 8 digits. The app validates with the same rule, so anything the API accepts is accepted here.
+* Switch between active organizations from the account chip; role and tenant data are refreshed on switching.
+* Viewer accounts see read-only product controls. Staff/admin/owner permissions remain enforced by the API.
+* Products support SKU, barcode, cost price, low-stock thresholds, and JSON-edited variants.
+* Reports use live sales/profit, best-seller, and stock-value endpoints and display plan-upgrade responses cleanly.
+* Team lists active members and lets owner/admin roles send seven-day invitations or remove members.
+* Product/order deletion is soft deletion; restore methods are included in the API facade.
+* The demo backend accepts the same versioned routes, so the complete core workflow works offline.
+
+Empty order pages still treat the backend's `404` response as an empty collection. Image URLs from Cloudflare R2 work directly; locally uploaded images use the desktop cache and configurable legacy `/uploads` path.
 
 ---
 
@@ -194,14 +193,14 @@ numbers use `0[567]` + 8 digits. The app validates with the same rule, so anythi
 npm test
 ```
 
-77 assertions across four layers, no Electron binary or MongoDB needed:
+82 assertions across four layers, no Electron binary or MongoDB needed:
 
 | File | Covers | Tests |
 | --- | --- | --- |
 | `test/mock-api.test.js` | Demo backend parity: auth, CRUD, stock rules, orders, cancellation, persistence | 29 |
 | `test/api-client.test.js` | Real HTTP client against a stub server: JSON, multipart upload, auth header, timeouts, error mapping | 9 |
-| `test/main-process.test.js` | `main.js` with a stubbed Electron: every IPC channel, sessions, 401 handling, image cache, settings persistence | 20 |
-| `test/ui.test.js` | The real renderer in jsdom: sign-in, dashboard, product creation with image, editing, deleting, stock modals, order creation, status changes, cancellation, settings, sign-out | 19 |
+| `test/main-process.test.js` | `main.js` with a stubbed Electron: IPC, refresh rotation, organization switching, 401/403 handling, R2/local images, settings | 23 |
+| `test/ui.test.js` | The real renderer in jsdom: sign-in, dashboard, reports, team, products, stock, orders, settings, sign-out | 20 |
 
 ---
 
