@@ -464,7 +464,7 @@ async function closeModals() {
 
     click($('.modal [data-act="ok"]'));
     await waitFor(
-      () => !mock.state().products.some((product) => product.name === 'UI Test Product'),
+      () => !mock.state().products.some((product) => product.name === 'UI Test Product' && !product.deletedAt),
       'product removed'
     );
 
@@ -626,8 +626,8 @@ async function closeModals() {
     const form = $('#auth-form');
     form.elements.name.value = 'UI Manager';
     form.elements.email.value = 'ui.manager@stockflow.app';
-    form.elements.password.value = 'secret123';
-    form.elements.confirm.value = 'secret123';
+    form.elements.password.value = 'UiManager1234';
+    form.elements.confirm.value = 'UiManager1234';
     click($('#auth-submit'));
 
     await waitFor(() => !$('#shell').hidden, 'signed in after register');

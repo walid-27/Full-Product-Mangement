@@ -34,10 +34,12 @@ contextBridge.exposeInMainWorld('desktop', {
   register: (form) => ipcRenderer.invoke('auth:register', form),
   getSession: () => ipcRenderer.invoke('auth:session'),
   logout: () => ipcRenderer.invoke('auth:logout'),
+  logoutAll: () => ipcRenderer.invoke('auth:logoutAll'),
   switchOrganization: (organizationId) => ipcRenderer.invoke('org:switch', organizationId),
 
   /* API */
   request: (options) => ipcRenderer.invoke('api:request', options),
+  download: (options) => ipcRenderer.invoke('api:download', options),
   ping: () => ipcRenderer.invoke('api:ping'),
 
   /* images */

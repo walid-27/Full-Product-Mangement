@@ -28,6 +28,10 @@
       .join('');
   }
 
+  function passwordHint() {
+    return '12+ characters with uppercase, lowercase and a number (max 72).';
+  }
+
   function fieldMarkup() {
     if (state.mode === 'register') {
       return (
@@ -37,11 +41,46 @@
         `<input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" value="${esc(state.email)}" /></label>` +
         '<label class="field"><span class="field__label">Password</span>' +
         '<div class="input-group input-group--clear">' +
-        '<input class="input" name="password" type="password" placeholder="At least 6 characters" autocomplete="new-password" />' +
+        `<input class="input" name="password" type="password" placeholder="${esc(passwordHint())}" autocomplete="new-password" />` +
         `<button class="input-group__clear" type="button" data-reveal aria-label="Show password">${App.icon('eye', 13)}</button>` +
         '</div></label>' +
         '<label class="field"><span class="field__label">Confirm password</span>' +
         '<input class="input" name="confirm" type="password" placeholder="Repeat the password" autocomplete="new-password" /></label>'
+      );
+    }
+
+    if (state.mode === 'forgot') {
+      return (
+        '<label class="field"><span class="field__label">Email</span>' +
+        `<input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus value="${esc(state.email)}" /></label>` +
+        '<p class="small mute">We will email you a one-hour reset link. The response never reveals whether the account exists.</p>'
+      );
+    }
+
+    if (state.mode === 'reset') {
+      return (
+        '<label class="field"><span class="field__label">Reset token</span>' +
+        '<input class="input" name="token" type="text" placeholder="Paste the token from your email" autocomplete="off" autofocus /></label>' +
+        '<label class="field"><span class="field__label">New password</span>' +
+        '<div class="input-group input-group--clear">' +
+        `<input class="input" name="password" type="password" placeholder="${esc(passwordHint())}" autocomplete="new-password" />` +
+        `<button class="input-group__clear" type="button" data-reveal aria-label="Show password">${App.icon('eye', 13)}</button>` +
+        '</div></label>' +
+        '<label class="field"><span class="field__label">Confirm password</span>' +
+        '<input class="input" name="confirm" type="password" placeholder="Repeat the password" autocomplete="new-password" /></label>'
+      );
+    }
+
+    if (state.mode === 'verify') {
+      return (
+        '<div class="alert alert--info">' +
+        `${App.icon('info', 15)}<div>Your account was created but the email is not verified yet. Paste the verification token from your email below — organization data stays locked until then.</div></div>` +
+        '<label class="field"><span class="field__label">Verification token</span>' +
+        '<input class="input" name="token" type="text" placeholder="Paste the token from your email" autocomplete="off" autofocus /></label>' +
+        '<div class="row" style="gap:8px">' +
+        '<button class="btn btn--ghost btn--sm" type="button" id="resend-verify">Resend verification email</button>' +
+        '<button class="btn btn--ghost btn--sm" type="button" id="back-login">Back to sign in</button>' +
+        '</div>'
       );
     }
 
@@ -52,7 +91,11 @@
       '<div class="input-group input-group--clear">' +
       '<input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password" />' +
       `<button class="input-group__clear" type="button" data-reveal aria-label="Show password">${App.icon('eye', 13)}</button>` +
-      '</div></label>'
+      '</div></label>' +
+      '<div class="row row--between">' +
+      '<button class="btn btn--quiet btn--sm" type="button" id="forgot-link">Forgot password?</button>' +
+      '<button class="btn btn--quiet btn--sm" type="button" id="verify-link">Verify email</button>' +
+      '</div>'
     );
   }
 
@@ -136,7 +179,16 @@
 
     host.hidden = false;
     bind(host);
+    bindModeLinks(host);
   }
+
+  const MODE_TEXT = {
+    login: ['Welcome back', 'Sign in to manage your products, stock and orders.', 'Sign in'],
+    register: ['Create your account', 'Register once in your API, then manage everything from here.', 'Create account'],
+    forgot: ['Reset your password', 'Enter your account email and we will send a reset link.', 'Send reset link'],
+    reset: ['Set a new password', 'Paste the reset token from your email and choose a new password.', 'Reset password'],
+    verify: ['Verify your email', 'Confirm your email to unlock your organization workspace.', 'Verify email']
+  };
 
   function setMode(mode) {
     const host = document.getElementById('auth');
@@ -148,14 +200,44 @@
       btn.classList.toggle('is-active', btn.dataset.mode === mode);
     });
     host.querySelector('#auth-fields').innerHTML = fieldMarkup();
-    host.querySelector('#auth-title').textContent = mode === 'login' ? 'Welcome back' : 'Create your account';
-    host.querySelector('#auth-sub').textContent =
-      mode === 'login'
-        ? 'Sign in to manage your products, stock and orders.'
-        : 'Register once in your API, then manage everything from here.';
-    host.querySelector('#auth-submit').textContent = mode === 'login' ? 'Sign in' : 'Create account';
+    const [title, sub, submit] = MODE_TEXT[mode] || MODE_TEXT.login;
+    host.querySelector('#auth-title').textContent = title;
+    host.querySelector('#auth-sub').textContent = sub;
+    host.querySelector('#auth-submit').textContent = submit;
     hideError();
     bindReveal(host);
+    bindModeLinks(host);
+  }
+
+  function bindModeLinks(host) {
+    const forgot = host.querySelector('#forgot-link');
+    if (forgot) forgot.addEventListener('click', () => setMode('forgot'));
+    const verify = host.querySelector('#verify-link');
+    if (verify) verify.addEventListener('click', () => setMode('verify'));
+    const back = host.querySelector('#back-login');
+    if (back) back.addEventListener('click', () => setMode('login'));
+    const resend = host.querySelector('#resend-verify');
+    if (resend) {
+      resend.addEventListener('click', async () => {
+        ui.setBusy(resend, true);
+        try {
+          await App.api.auth.resendVerification();
+          ui.toast({ type: 'success', title: 'Verification email sent', message: 'If verification is required, an email has been sent.' });
+        } catch (error) {
+          showError(error.message);
+        } finally {
+          ui.setBusy(resend, false);
+        }
+      });
+    }
+  }
+
+  function strongPasswordError(password) {
+    if (!password || password.length < 12 || password.length > 72) return 'Use 12 to 72 characters.';
+    if (!/[a-z]/.test(password)) return 'Include a lowercase letter.';
+    if (!/[A-Z]/.test(password)) return 'Include an uppercase letter.';
+    if (!/\d/.test(password)) return 'Include a number.';
+    return null;
   }
 
   function showError(message) {
@@ -267,23 +349,64 @@
     const email = String(data.email || '').trim();
     const password = String(data.password || '');
 
-    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      showError('Please enter a valid email address.');
-      return;
-    }
-    if (!password) {
-      showError('Please enter your password.');
-      return;
-    }
-
     ui.setBusy(submit, true);
     try {
+      if (state.mode === 'forgot') {
+        if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+          showError('Please enter a valid email address.');
+          return;
+        }
+        await App.api.auth.forgotPassword(email);
+        ui.toast({ type: 'success', title: 'Reset link sent', message: 'If the account exists, a reset email has been sent.' });
+        setMode('reset');
+        return;
+      }
+
+      if (state.mode === 'reset') {
+        const token = String(data.token || '').trim();
+        if (!token) throw new Error('Paste the reset token from your email.');
+        const weak = strongPasswordError(password);
+        if (weak) throw new Error(`Password: ${weak}`);
+        if (password !== String(data.confirm || '')) throw new Error('The two passwords do not match.');
+        await App.api.auth.resetPassword(token, password);
+        ui.toast({ type: 'success', title: 'Password reset', message: 'Sign in with your new password.' });
+        setMode('login');
+        return;
+      }
+
+      if (state.mode === 'verify') {
+        const token = String(data.token || '').trim();
+        if (!token) throw new Error('Paste the verification token from your email.');
+        await App.api.auth.verifyEmail(token);
+        ui.toast({ type: 'success', title: 'Email verified', message: 'Sign in to continue.' });
+        setMode('login');
+        return;
+      }
+
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        showError('Please enter a valid email address.');
+        return;
+      }
+      if (!password) {
+        showError('Please enter your password.');
+        return;
+      }
+
       if (state.mode === 'register') {
-        if (password.length < 6) throw new Error('Password must contain at least 6 characters.');
+        const name = String(data.name || '').trim();
+        if (name.length < 2 || name.length > 100) throw new Error('Full name must be 2 to 100 characters.');
+        const weak = strongPasswordError(password);
+        if (weak) throw new Error(`Password: ${weak}`);
         if (password !== String(data.confirm || '')) throw new Error('The two passwords do not match.');
 
-        await App.api.auth.register({ name: String(data.name || '').trim(), email, password });
-        const session = await App.api.auth.login(email, password);
+        const result = await App.api.auth.register({ name, email, password });
+        const registeredSession = result && result.session;
+        if (registeredSession && registeredSession.emailVerified === false) {
+          ui.toast({ type: 'info', title: 'Check your email', message: 'Verify your email to unlock your workspace.' });
+          setMode('verify');
+          return;
+        }
+        const session = registeredSession || (await App.api.auth.login(email, password));
         ui.toast({ type: 'success', title: 'Account created', message: 'You are signed in — welcome to StockFlow.' });
         App.onAuthenticated(session);
         return;
@@ -294,8 +417,18 @@
 
       const session = await App.api.auth.login(email, password);
       state.email = email;
+      if (session && session.emailVerified === false) {
+        ui.toast({ type: 'warn', title: 'Email not verified', message: 'Verify your email to unlock your workspace.' });
+        setMode('verify');
+        return;
+      }
       App.onAuthenticated(session);
     } catch (error) {
+      if (error && (error.code === 'EMAIL_NOT_VERIFIED' || /verify your email/i.test(error.message || ''))) {
+        setMode('verify');
+        showError('Verify your email before accessing organization data.');
+        return;
+      }
       showError(error.message || 'Something went wrong. Please try again.');
       ui.setBusy(submit, false);
     }

@@ -102,14 +102,15 @@ Regenerate them at any time with `node ci/make-preview.js`.
 **Inventory**
 * All stock, low-stock and out-of-stock tabs with counters
 * Stock-in / stock-out modal with live preview of the resulting quantity
-* Local movement log (this computer) so you always have a trail of what you changed
-  — the API does not expose a movements endpoint
+* Movement history from the server (`/api/v1/features/reports/movements`), with a local
+  log kept as a fallback when reports are not on your plan
 
 **Orders**
 * Pipeline table: search by customer or city, filter by status, sort, pagination
 * Drawer with customer details, items, totals and status actions
 * Create an order with a searchable product picker, quantity steppers and a live total
 * Change status or cancel (cancelling returns stock, as the API does)
+* Download the invoice / delivery-label PDF, create a shipment, or soft-delete an order
 * Algerian mobile validation matches the backend rule (`0[567]XXXXXXXX`)
 
 **Everywhere**
@@ -158,7 +159,20 @@ so the UI is not affected by browser CORS rules either.
 | Stock in / out | `POST /api/v1/inventory/stock-in/:id` · `POST /api/v1/inventory/stock-out/:id` |
 | Alerts | `GET /api/v1/inventory/low-stock` · `GET /api/v1/inventory/out-stock` |
 | Orders | `POST /api/v1/orders` · `GET /api/v1/orders` · `GET /api/v1/orders/:id` |
-| Status / cancel | `PATCH /api/order/status/:id` · `PATCH /api/order/cancel-order/:id` |
+| Status / cancel | `PATCH /api/v1/orders/status/:id` · `PATCH /api/v1/orders/cancel-order/:id` |
+| Delete / restore | `DELETE /api/v1/orders/:id` · `POST /api/v1/orders/:id/restore` (products likewise) |
+| Restore product | `POST /api/v1/products/:id/restore` · `GET /api/v1/products/analysis` |
+| Dashboard | `GET /api/v1/dashboard/product` · `GET /api/v1/dashboard/order` |
+| Verify / recover | `POST /auth/verify-email` · `POST /auth/resend-verification` · `POST /auth/forgot-password` · `POST /auth/reset-password` |
+| Sign out everywhere | `POST /auth/logout-all` (refresh sessions revoked server-side) |
+| Reports | `GET /api/v1/features/reports/sales|best-sellers|stock|movements` |
+| Import / export | `POST /api/v1/features/products/import` · `GET /api/v1/features/export/:type?format=csv|xlsx` |
+| Documents / shipment | `GET /api/v1/features/orders/:id/documents/invoice|label` · `POST /api/v1/features/orders/:id/shipment` |
+| Global search | `GET /api/v1/search?q=` (`Ctrl+K` anywhere) |
+| Organizations | `GET /api/organizations` · `POST /api/organizations/switch` · members, invites, roles, audit logs, leave/delete |
+| Billing (owner) | `GET /api/billing/subscription|usage|invoices` · `POST /api/billing/checkout|portal|cancel` |
+| API keys / webhooks | `GET|POST|DELETE /api/api-keys` · `GET|POST|DELETE /api/webhooks` (secrets shown once) |
+| Account | `GET /api/account/onboarding|export` · `PATCH /api/account/notifications` · `DELETE /api/account` |
 
 The desktop client uses the versioned `/api/v1` product, inventory, order, search, and report endpoints. Authentication uses 15-minute access tokens plus automatic 30-day refresh-cookie rotation. Both tokens remain in the Electron main process and are encrypted at rest when the OS credential store is available.
 
@@ -171,6 +185,8 @@ The desktop client uses the versioned `/api/v1` product, inventory, order, searc
 * Team lists active members and lets owner/admin roles send seven-day invitations or remove members.
 * Product/order deletion is soft deletion; restore methods are included in the API facade.
 * The demo backend accepts the same versioned routes, so the complete core workflow works offline.
+* Settings shows live plan usage and (owner) billing actions, API keys and webhooks, notification
+  preferences, account export and deletion; plan-gated answers (`402 UPGRADE_REQUIRED`) are surfaced cleanly.
 
 Empty order pages still treat the backend's `404` response as an empty collection. Image URLs from Cloudflare R2 work directly; locally uploaded images use the desktop cache and configurable legacy `/uploads` path.
 
@@ -193,11 +209,11 @@ Empty order pages still treat the backend's `404` response as an empty collectio
 npm test
 ```
 
-82 assertions across four layers, no Electron binary or MongoDB needed:
+87 tests across four layers, no Electron binary or MongoDB needed:
 
 | File | Covers | Tests |
 | --- | --- | --- |
-| `test/mock-api.test.js` | Demo backend parity: auth, CRUD, stock rules, orders, cancellation, persistence | 29 |
+| `test/mock-api.test.js` | Demo backend parity: auth, CRUD, stock rules, orders, cancellation, persistence, dashboard/reports/billing/keys/webhooks/search/import/export/restore under the `/api/v1` aliases | 35 |
 | `test/api-client.test.js` | Real HTTP client against a stub server: JSON, multipart upload, auth header, timeouts, error mapping | 9 |
 | `test/main-process.test.js` | `main.js` with a stubbed Electron: IPC, refresh rotation, organization switching, 401/403 handling, R2/local images, settings | 23 |
 | `test/ui.test.js` | The real renderer in jsdom: sign-in, dashboard, reports, team, products, stock, orders, settings, sign-out | 20 |
@@ -234,7 +250,7 @@ Click *More info → Run anyway*, or sign the build with your own certificate
 | --- | --- |
 | “Could not reach the API server” | Start the backend (`npm run dev`), check the URL/port, and that MongoDB is running. Use *Test* in Settings or on the sign-in screen. |
 | Connection pill shows **API offline** | Same as above; it re-checks every 30 s. |
-| Sign-in fails with “The email or Password is invalaid” | That message comes from the API. Register an account first, or use demo mode. |
+| Sign-in fails with “The email or password is invalid” | That message comes from the API. Register an account first, or use demo mode. |
 | Products show initials instead of photos | The API does not serve `/uploads`. Images uploaded *from this app* are cached locally; older ones need a reachable images path (Settings). |
 | `npm install` fails behind a proxy | Configure the registry (`npm config set registry …`) and, for Electron, `ELECTRON_MIRROR`. |
 | Empty window after an update | `Ctrl+R` reloads; `Ctrl+Shift+I` opens DevTools in a development build (`npm run dev`). |

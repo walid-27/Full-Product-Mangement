@@ -2773,7 +2773,7 @@ table.data tbody tr:hover .row-actions {
           </div>
 
           <form class="auth-form" id="auth-form" novalidate="">
-            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label></div>
+            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label><div class="row row--between"><button class="btn btn--quiet btn--sm" type="button" id="forgot-link">Forgot password?</button><button class="btn btn--quiet btn--sm" type="button" id="verify-link">Verify email</button></div></div>
             <div id="auth-error" hidden=""></div>
             <button class="btn btn--primary btn--block" type="submit" id="auth-submit">Sign in</button>
           </form>
@@ -2809,7 +2809,7 @@ table.data tbody tr:hover .row-actions {
         <nav class="nav" id="nav-main" aria-label="Workspace"></nav>
         <div class="sidebar__foot">
           <nav class="nav" id="nav-bottom" aria-label="Preferences"></nav>
-          <button class="userchip" id="userchip" type="button" title="Account and settings"></button>
+          <div class="userchip" id="userchip" role="button" tabindex="0" title="Account and organization settings"></div>
         </div>
       </aside>
 
@@ -2828,6 +2828,8 @@ table.data tbody tr:hover .row-actions {
     <div id="modal-root"></div>
     <div class="toasts" id="toast-root"></div>
 
+    
+    
     
     
     

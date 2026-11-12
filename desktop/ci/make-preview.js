@@ -28,6 +28,8 @@ const SCRIPTS = [
   'js/views/products.js',
   'js/views/inventory.js',
   'js/views/orders.js',
+  'js/views/reports.js',
+  'js/views/team.js',
   'js/views/settings.js',
   'js/app.js'
 ];
@@ -200,16 +202,24 @@ function click(selector) {
   click('.drawer [data-close]');
   await wait(200);
 
+  click('[data-route="reports"]');
+  await wait(800);
+  snapshot('07-reports', 'StockFlow — Reports');
+
+  click('[data-route="team"]');
+  await wait(800);
+  snapshot('08-team', 'StockFlow — Team');
+
   click('[data-route="settings"]');
   await wait(800);
-  snapshot('07-settings', 'StockFlow — Settings');
+  snapshot('09-settings', 'StockFlow — Settings');
 
   click('#theme-tabs [data-theme="light"]');
   await wait(500);
-  snapshot('08-settings-light', 'StockFlow — Settings (light)');
+  snapshot('10-settings-light', 'StockFlow — Settings (light)');
   click('[data-route="dashboard"]');
   await wait(800);
-  snapshot('09-dashboard-light', 'StockFlow — Dashboard (light)');
+  snapshot('11-dashboard-light', 'StockFlow — Dashboard (light)');
 
   fs.rmSync(tmp, { recursive: true, force: true });
   console.log('\nDone.\n');

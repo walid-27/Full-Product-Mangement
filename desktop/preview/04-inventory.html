@@ -2773,7 +2773,7 @@ table.data tbody tr:hover .row-actions {
           </div>
 
           <form class="auth-form" id="auth-form" novalidate="">
-            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label></div>
+            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label><div class="row row--between"><button class="btn btn--quiet btn--sm" type="button" id="forgot-link">Forgot password?</button><button class="btn btn--quiet btn--sm" type="button" id="verify-link">Verify email</button></div></div>
             <div id="auth-error" hidden=""></div>
             <button class="btn btn--primary btn--block" type="submit" id="auth-submit">Sign in</button>
           </form>
@@ -2822,17 +2822,23 @@ table.data tbody tr:hover .row-actions {
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h5"></path></svg>
           <span class="nav__text">Orders</span>
           <span class="nav__count" data-count="orders" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="reports">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"></rect><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"></rect></svg>
+          <span class="nav__text">Reports</span>
+          <span class="nav__count" data-count="reports" hidden=""></span>
         </button></nav>
         <div class="sidebar__foot">
-          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item" type="button" data-route="settings">
+          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item" type="button" data-route="team">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+          <span class="nav__text">Team</span>
+          <span class="nav__count" data-count="team" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="settings">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path></svg>
           <span class="nav__text">Settings</span>
           <span class="nav__count" data-count="settings" hidden=""></span>
         </button></nav>
-          <button class="userchip" id="userchip" type="button" title="Account and settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
-        <span class="userchip__name">Demo Manager</span>
-        <span class="userchip__mail">demo@stockflow.app</span>
-      </span></button>
+          <div class="userchip" id="userchip" role="button" tabindex="0" title="Account and organization settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
+        <span class="userchip__name">Demo Manager</span><span class="userchip__mail">Demo Organization</span></span></div>
         </div>
       </aside>
 
@@ -2908,7 +2914,7 @@ table.data tbody tr:hover .row-actions {
             </tr>
           </thead>
           <tbody>
-        <tr data-id="9a75da7dab0fc252adc324a5">
+        <tr data-id="2d100f45f120946ed2399595">
           <td>
             <div class="cell-main">
               <span class="thumb ">H1</span>
@@ -2939,7 +2945,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="94c4519b492d0c58f6c07a40">
+        <tr data-id="5dc536c202dcbdd071baa746">
           <td>
             <div class="cell-main">
               <span class="thumb ">C1</span>
@@ -2970,7 +2976,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="a5f453f3cabbdb19e1436207">
+        <tr data-id="6a7184c1128bdf76e93c8491">
           <td>
             <div class="cell-main">
               <span class="thumb ">C5</span>
@@ -3001,7 +3007,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="e1c371c08ef932332faf8b94">
+        <tr data-id="9be2619bc1c4a7d11da48708">
           <td>
             <div class="cell-main">
               <span class="thumb ">KB</span>
@@ -3032,7 +3038,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="799ca51100cd0778d8047185">
+        <tr data-id="1b49bcba95d02654969d285b">
           <td>
             <div class="cell-main">
               <span class="thumb ">TA</span>
@@ -3063,7 +3069,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="f7a742f9e1aeaee9d194ffcd">
+        <tr data-id="56afce6aa9f002542309112a">
           <td>
             <div class="cell-main">
               <span class="thumb ">SA</span>
@@ -3094,7 +3100,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="b96e205f935dd349b4e5b582">
+        <tr data-id="67f6f0e98ddd5dd83438842e">
           <td>
             <div class="cell-main">
               <span class="thumb ">MC</span>
@@ -3125,7 +3131,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="452cf9857a8626fbb03a2277">
+        <tr data-id="0b15e836f0f03f3bfb9627c6">
           <td>
             <div class="cell-main">
               <span class="thumb ">S2</span>
@@ -3156,7 +3162,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="ef77ccd61d5f46547cd4f9d8">
+        <tr data-id="cf1658decd4bb2550653286e">
           <td>
             <div class="cell-main">
               <span class="thumb ">LT</span>
@@ -3187,7 +3193,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="dfc01cdf11cbed75e6a27942">
+        <tr data-id="af12fb9d14b8df9ed306ef93">
           <td>
             <div class="cell-main">
               <span class="thumb ">SC</span>
@@ -3218,7 +3224,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="5cb340e17a5b582bac14fd55">
+        <tr data-id="77a1bd0a63c167c7aa1be49e">
           <td>
             <div class="cell-main">
               <span class="thumb ">C6</span>
@@ -3249,7 +3255,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="40d1a6ec6a6e94bad3550e2b">
+        <tr data-id="4f796bcab6c9a6cdbbead852">
           <td>
             <div class="cell-main">
               <span class="thumb ">CG</span>
@@ -3280,7 +3286,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="714b09e49c1d48435960089a">
+        <tr data-id="9ceea0d861dc6fe5ebfab04c">
           <td>
             <div class="cell-main">
               <span class="thumb ">EW</span>
@@ -3311,7 +3317,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="732225f972530d50c6bf9592">
+        <tr data-id="59c84b5603de33374da4451a">
           <td>
             <div class="cell-main">
               <span class="thumb ">SE</span>
@@ -3342,7 +3348,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="c75ba4692f99d824d413267a">
+        <tr data-id="d149a17c25d2b09ae5e98223">
           <td>
             <div class="cell-main">
               <span class="thumb ">CR</span>
@@ -3373,7 +3379,7 @@ table.data tbody tr:hover .row-actions {
             </div>
           </td>
         </tr>
-        <tr data-id="bc6595f641f3b48d51988f0b">
+        <tr data-id="ff9333090061dfed347ebcec">
           <td>
             <div class="cell-main">
               <span class="thumb ">CA</span>
@@ -3414,6 +3420,8 @@ table.data tbody tr:hover .row-actions {
     <div id="modal-root"></div>
     <div class="toasts" id="toast-root"><div class="toast toast--success"><span class="toast__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></span><div class="grow"><div class="toast__title">Demo workspace ready</div><div class="toast__msg">Sample products, stock and orders are stored locally.</div></div><button class="iconbtn" aria-label="Dismiss"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></div>
 
+    
+    
     
     
     

@@ -9,6 +9,8 @@
       super((result && (result.error || 'Request failed')) || 'Request failed');
       this.name = 'ApiError';
       this.status = (result && result.status) || 0;
+      this.code = (result && (result.code || (result.data && result.data.code))) || null;
+      this.details = (result && (result.details || (result.data && result.data.details))) || null;
       this.result = result || {};
       this.sessionExpired = Boolean(result && result.sessionExpired);
     }
@@ -29,6 +31,19 @@
       throw error;
     }
     return result.data;
+  }
+
+  async function download(options) {
+    const bridgeApi = bridge();
+    if (typeof bridgeApi.download !== 'function') {
+      throw new ApiError({ ok: false, status: 0, error: 'Downloads are not available in this build.' });
+    }
+    const result = await bridgeApi.download(options);
+    if (!result.ok) {
+      if (result.canceled) return null;
+      throw new ApiError(result);
+    }
+    return result;
   }
 
   /* ------------------------------------------------------------- products */
@@ -186,8 +201,24 @@
       });
     },
 
+    remove(id) {
+      return raw({ method: 'DELETE', path: `/api/v1/orders/${encodeURIComponent(id)}` });
+    },
+
     restore(id) {
       return raw({ method: 'POST', path: `/api/v1/orders/${encodeURIComponent(id)}/restore` });
+    },
+
+    document(id, type) {
+      return download({
+        method: 'GET',
+        path: `/api/v1/features/orders/${encodeURIComponent(id)}/documents/${encodeURIComponent(type)}`,
+        filename: `${type}-${id}.pdf`
+      });
+    },
+
+    shipment(id) {
+      return raw({ method: 'POST', path: `/api/v1/features/orders/${encodeURIComponent(id)}/shipment` });
     }
   };
 
@@ -238,10 +269,15 @@
       async register(form) {
         const result = await bridge().register(form);
         if (!result.ok) throw new ApiError(result);
-        return result.data;
+        return { data: result.data, session: result.session || null };
       },
       session: () => bridge().getSession(),
-      logout: () => bridge().logout()
+      logout: () => bridge().logout(),
+      logoutAll: () => (typeof bridge().logoutAll === 'function' ? bridge().logoutAll() : bridge().logout()),
+      verifyEmail: (token) => raw({ method: 'POST', path: '/auth/verify-email', body: { token }, auth: false }),
+      resendVerification: () => raw({ method: 'POST', path: '/auth/resend-verification' }),
+      forgotPassword: (email) => raw({ method: 'POST', path: '/auth/forgot-password', body: { email }, auth: false }),
+      resetPassword: (token, password) => raw({ method: 'POST', path: '/auth/reset-password', body: { token, password }, auth: false })
     },
 
     config: {
@@ -254,10 +290,15 @@
     openDataFolder: () => bridge().openDataFolder(),
     openExternal: (url) => bridge().openExternal(url),
     resetDemo: () => bridge().resetDemo(),
+    download,
 
     products: productApi,
     inventory: inventoryApi,
     orders: orderApi,
+    dashboard: {
+      products: (date) => raw({ method: 'GET', path: '/api/v1/dashboard/product', query: { date } }),
+      orders: (period) => raw({ method: 'GET', path: '/api/v1/dashboard/order', query: { period } })
+    },
     organizations: {
       list: () => raw({ method: 'GET', path: '/api/organizations' }),
       async switch(id) {
@@ -267,9 +308,31 @@
       },
       members: () => raw({ method: 'GET', path: '/api/organizations/members' }),
       invite: (email, role) => raw({ method: 'POST', path: '/api/organizations/invites', body: { email, role } }),
+      acceptInvite: (token) => raw({ method: 'POST', path: '/api/organizations/invites/accept', body: { token } }),
       removeMember: (id) => raw({ method: 'DELETE', path: `/api/organizations/members/${encodeURIComponent(id)}` }),
       changeRole: (id, role) => raw({ method: 'PATCH', path: `/api/organizations/members/${encodeURIComponent(id)}/role`, body: { role } }),
+      leave: () => raw({ method: 'POST', path: '/api/organizations/leave' }),
+      remove: () => raw({ method: 'DELETE', path: '/api/organizations' }),
       auditLogs: (query) => raw({ method: 'GET', path: '/api/organizations/audit-logs', query })
+    },
+    billing: {
+      subscription: () => raw({ method: 'GET', path: '/api/billing/subscription' }),
+      usage: () => raw({ method: 'GET', path: '/api/billing/usage' }),
+      checkout: (plan) => raw({ method: 'POST', path: '/api/billing/checkout', body: { plan } }),
+      portal: () => raw({ method: 'POST', path: '/api/billing/portal' }),
+      cancel: () => raw({ method: 'POST', path: '/api/billing/cancel' }),
+      invoices: (query) => raw({ method: 'GET', path: '/api/billing/invoices', query })
+    },
+    apiKeys: {
+      list: () => raw({ method: 'GET', path: '/api/api-keys' }),
+      create: (name, scopes, rateLimitPerMinute) =>
+        raw({ method: 'POST', path: '/api/api-keys', body: { name, scopes, rateLimitPerMinute } }),
+      revoke: (id) => raw({ method: 'DELETE', path: `/api/api-keys/${encodeURIComponent(id)}` })
+    },
+    webhooks: {
+      list: () => raw({ method: 'GET', path: '/api/webhooks' }),
+      create: (url, events) => raw({ method: 'POST', path: '/api/webhooks', body: { url, events } }),
+      remove: (id) => raw({ method: 'DELETE', path: `/api/webhooks/${encodeURIComponent(id)}` })
     },
     reports: {
       sales: (period) => raw({ method: 'GET', path: '/api/v1/features/reports/sales', query: { period } }),
@@ -277,9 +340,26 @@
       stock: () => raw({ method: 'GET', path: '/api/v1/features/reports/stock' }),
       movements: (query) => raw({ method: 'GET', path: '/api/v1/features/reports/movements', query })
     },
+    features: {
+      importProducts: (file) =>
+        raw({
+          method: 'POST',
+          path: '/api/v1/features/products/import',
+          form: { fields: {}, file: { ...file, field: 'file' } }
+        }),
+      exportData: (type, format) =>
+        download({
+          method: 'GET',
+          path: `/api/v1/features/export/${encodeURIComponent(type)}`,
+          query: { format: format || 'csv' },
+          filename: `${type}.${format || 'csv'}`
+        })
+    },
     account: {
       onboarding: () => raw({ method: 'GET', path: '/api/account/onboarding' }),
-      notifications: (preferences) => raw({ method: 'PATCH', path: '/api/account/notifications', body: preferences })
+      notifications: (preferences) => raw({ method: 'PATCH', path: '/api/account/notifications', body: preferences }),
+      exportData: () => download({ method: 'GET', path: '/api/account/export', filename: 'account-export.json' }),
+      remove: () => raw({ method: 'DELETE', path: '/api/account' })
     },
     search: (q, limit) => raw({ method: 'GET', path: '/api/v1/search', query: { q, limit } }),
 

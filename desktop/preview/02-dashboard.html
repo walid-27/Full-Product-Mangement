@@ -2773,7 +2773,7 @@ table.data tbody tr:hover .row-actions {
           </div>
 
           <form class="auth-form" id="auth-form" novalidate="">
-            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label></div>
+            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label><div class="row row--between"><button class="btn btn--quiet btn--sm" type="button" id="forgot-link">Forgot password?</button><button class="btn btn--quiet btn--sm" type="button" id="verify-link">Verify email</button></div></div>
             <div id="auth-error" hidden=""></div>
             <button class="btn btn--primary btn--block" type="submit" id="auth-submit">Sign in</button>
           </form>
@@ -2822,17 +2822,23 @@ table.data tbody tr:hover .row-actions {
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h5"></path></svg>
           <span class="nav__text">Orders</span>
           <span class="nav__count" data-count="orders" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="reports">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"></rect><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"></rect></svg>
+          <span class="nav__text">Reports</span>
+          <span class="nav__count" data-count="reports" hidden=""></span>
         </button></nav>
         <div class="sidebar__foot">
-          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item" type="button" data-route="settings">
+          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item" type="button" data-route="team">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+          <span class="nav__text">Team</span>
+          <span class="nav__count" data-count="team" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="settings">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path></svg>
           <span class="nav__text">Settings</span>
           <span class="nav__count" data-count="settings" hidden=""></span>
         </button></nav>
-          <button class="userchip" id="userchip" type="button" title="Account and settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
-        <span class="userchip__name">Demo Manager</span>
-        <span class="userchip__mail">demo@stockflow.app</span>
-      </span></button>
+          <div class="userchip" id="userchip" role="button" tabindex="0" title="Account and organization settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
+        <span class="userchip__name">Demo Manager</span><span class="userchip__mail">Demo Organization</span></span></div>
         </div>
       </aside>
 
@@ -2905,15 +2911,15 @@ table.data tbody tr:hover .row-actions {
           <div class="chart__col">
             <div class="chart__track">
               <div class="chart__bar " style="height:50%">
-                <span class="chart__tip">26 Oct · 1 order · 2,850 DZD</span>
+                <span class="chart__tip">30 Oct · 1 order · 2,850 DZD</span>
               </div>
             </div>
-            <span class="chart__x">26</span>
+            <span class="chart__x">30</span>
           </div>
           <div class="chart__col">
             <div class="chart__track">
               <div class="chart__bar chart__bar--muted" style="height:3%">
-                <span class="chart__tip">27 Oct · 0 orders</span>
+                <span class="chart__tip">31 Oct · 0 orders</span>
               </div>
             </div>
             <span class="chart__x"></span>
@@ -2921,39 +2927,7 @@ table.data tbody tr:hover .row-actions {
           <div class="chart__col">
             <div class="chart__track">
               <div class="chart__bar " style="height:100%">
-                <span class="chart__tip">28 Oct · 2 orders · 9,450 DZD</span>
-              </div>
-            </div>
-            <span class="chart__x">28</span>
-          </div>
-          <div class="chart__col">
-            <div class="chart__track">
-              <div class="chart__bar chart__bar--muted" style="height:3%">
-                <span class="chart__tip">29 Oct · 0 orders</span>
-              </div>
-            </div>
-            <span class="chart__x"></span>
-          </div>
-          <div class="chart__col">
-            <div class="chart__track">
-              <div class="chart__bar " style="height:50%">
-                <span class="chart__tip">30 Oct · 1 order</span>
-              </div>
-            </div>
-            <span class="chart__x">30</span>
-          </div>
-          <div class="chart__col">
-            <div class="chart__track">
-              <div class="chart__bar " style="height:50%">
-                <span class="chart__tip">31 Oct · 1 order</span>
-              </div>
-            </div>
-            <span class="chart__x"></span>
-          </div>
-          <div class="chart__col">
-            <div class="chart__track">
-              <div class="chart__bar " style="height:50%">
-                <span class="chart__tip">1 Nov · 1 order</span>
+                <span class="chart__tip">1 Nov · 2 orders · 9,450 DZD</span>
               </div>
             </div>
             <span class="chart__x">1</span>
@@ -2969,7 +2943,7 @@ table.data tbody tr:hover .row-actions {
           <div class="chart__col">
             <div class="chart__track">
               <div class="chart__bar " style="height:50%">
-                <span class="chart__tip">3 Nov · 1 order · 5,600 DZD</span>
+                <span class="chart__tip">3 Nov · 1 order</span>
               </div>
             </div>
             <span class="chart__x">3</span>
@@ -2985,23 +2959,23 @@ table.data tbody tr:hover .row-actions {
           <div class="chart__col">
             <div class="chart__track">
               <div class="chart__bar " style="height:50%">
-                <span class="chart__tip">5 Nov · 1 order · 44 K DZD</span>
+                <span class="chart__tip">5 Nov · 1 order</span>
               </div>
             </div>
             <span class="chart__x">5</span>
           </div>
           <div class="chart__col">
             <div class="chart__track">
-              <div class="chart__bar " style="height:50%">
-                <span class="chart__tip">6 Nov · 1 order</span>
+              <div class="chart__bar chart__bar--muted" style="height:3%">
+                <span class="chart__tip">6 Nov · 0 orders</span>
               </div>
             </div>
             <span class="chart__x"></span>
           </div>
           <div class="chart__col">
             <div class="chart__track">
-              <div class="chart__bar chart__bar--muted" style="height:3%">
-                <span class="chart__tip">7 Nov · 0 orders</span>
+              <div class="chart__bar " style="height:50%">
+                <span class="chart__tip">7 Nov · 1 order · 5,600 DZD</span>
               </div>
             </div>
             <span class="chart__x">7</span>
@@ -3010,6 +2984,38 @@ table.data tbody tr:hover .row-actions {
             <div class="chart__track">
               <div class="chart__bar " style="height:50%">
                 <span class="chart__tip">8 Nov · 1 order</span>
+              </div>
+            </div>
+            <span class="chart__x"></span>
+          </div>
+          <div class="chart__col">
+            <div class="chart__track">
+              <div class="chart__bar " style="height:50%">
+                <span class="chart__tip">9 Nov · 1 order · 44 K DZD</span>
+              </div>
+            </div>
+            <span class="chart__x">9</span>
+          </div>
+          <div class="chart__col">
+            <div class="chart__track">
+              <div class="chart__bar " style="height:50%">
+                <span class="chart__tip">10 Nov · 1 order</span>
+              </div>
+            </div>
+            <span class="chart__x"></span>
+          </div>
+          <div class="chart__col">
+            <div class="chart__track">
+              <div class="chart__bar chart__bar--muted" style="height:3%">
+                <span class="chart__tip">11 Nov · 0 orders</span>
+              </div>
+            </div>
+            <span class="chart__x">11</span>
+          </div>
+          <div class="chart__col">
+            <div class="chart__track">
+              <div class="chart__bar " style="height:50%">
+                <span class="chart__tip">12 Nov · 1 order</span>
               </div>
             </div>
             <span class="chart__x"></span>
@@ -3112,7 +3118,7 @@ table.data tbody tr:hover .row-actions {
           </button>
         </div>
         <div class="table-wrap"><table class="data"><tbody>
-              <tr data-order="c5e590ac65f51d7919fe26df" style="cursor:pointer">
+              <tr data-order="5d80715b8d6f1cc8351106e1" style="cursor:pointer">
                 <td>
                   <div class="cell-main">
                     <span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">AB</span>
@@ -3126,7 +3132,7 @@ table.data tbody tr:hover .row-actions {
                 <td><span class="pill pill--pending"><span class="dot"></span>pending</span></td>
                 <td class="right mute small nowrap">just now</td>
               </tr>
-              <tr data-order="8f347ebc8d882fdc609555d0" style="cursor:pointer">
+              <tr data-order="571edd91869900ec906dd885" style="cursor:pointer">
                 <td>
                   <div class="cell-main">
                     <span class="avatar avatar--sm" style="background:linear-gradient(140deg, #38bdf8, #0369a1);color:#06121a">LH</span>
@@ -3140,7 +3146,7 @@ table.data tbody tr:hover .row-actions {
                 <td><span class="pill pill--confirmed"><span class="dot"></span>confirmed</span></td>
                 <td class="right mute small nowrap">2 d ago</td>
               </tr>
-              <tr data-order="5543b71cd6ab633cc38ec259" style="cursor:pointer">
+              <tr data-order="bef75ad892478deeddd41e88" style="cursor:pointer">
                 <td>
                   <div class="cell-main">
                     <span class="avatar avatar--sm" style="background:linear-gradient(140deg, #fb923c, #c2410c);color:#06121a">SB</span>
@@ -3154,7 +3160,7 @@ table.data tbody tr:hover .row-actions {
                 <td><span class="pill pill--delivered"><span class="dot"></span>delivered</span></td>
                 <td class="right mute small nowrap">3 d ago</td>
               </tr>
-              <tr data-order="91721bb4c1d8ec12e8133bfc" style="cursor:pointer">
+              <tr data-order="f57d4a6c15a3ac840b174359" style="cursor:pointer">
                 <td>
                   <div class="cell-main">
                     <span class="avatar avatar--sm" style="background:linear-gradient(140deg, #818cf8, #4338ca);color:#06121a">YM</span>
@@ -3168,7 +3174,7 @@ table.data tbody tr:hover .row-actions {
                 <td><span class="pill pill--shipped"><span class="dot"></span>shipped</span></td>
                 <td class="right mute small nowrap">4 d ago</td>
               </tr>
-              <tr data-order="ecb8412607df9b4fda4eab6a" style="cursor:pointer">
+              <tr data-order="07cf03af8d3c36ca8d5979eb" style="cursor:pointer">
                 <td>
                   <div class="cell-main">
                     <span class="avatar avatar--sm" style="background:linear-gradient(140deg, #4ade80, #15803d);color:#06121a">MA</span>
@@ -3182,7 +3188,7 @@ table.data tbody tr:hover .row-actions {
                 <td><span class="pill pill--delivered"><span class="dot"></span>delivered</span></td>
                 <td class="right mute small nowrap">5 d ago</td>
               </tr>
-              <tr data-order="c00aa7a7916ecd656901b468" style="cursor:pointer">
+              <tr data-order="1d1fcbcded79c4a29bb4f502" style="cursor:pointer">
                 <td>
                   <div class="cell-main">
                     <span class="avatar avatar--sm" style="background:linear-gradient(140deg, #a78bfa, #6d28d9);color:#06121a">KZ</span>
@@ -3194,7 +3200,7 @@ table.data tbody tr:hover .row-actions {
                 </td>
                 <td class="num">23,100 DZD</td>
                 <td><span class="pill pill--pending"><span class="dot"></span>pending</span></td>
-                <td class="right mute small nowrap">1 Nov</td>
+                <td class="right mute small nowrap">5 Nov</td>
               </tr></tbody></table></div>
       </div>
         
@@ -3223,7 +3229,7 @@ table.data tbody tr:hover .row-actions {
               <span class="pill pill--out">Out</span>
             </td>
             <td class="right">
-              <button class="btn btn--ghost btn--sm" type="button" data-restock="714b09e49c1d48435960089a">Restock</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-restock="9ceea0d861dc6fe5ebfab04c">Restock</button>
             </td>
           </tr>
           <tr>
@@ -3240,7 +3246,7 @@ table.data tbody tr:hover .row-actions {
               <span class="pill pill--out">Out</span>
             </td>
             <td class="right">
-              <button class="btn btn--ghost btn--sm" type="button" data-restock="799ca51100cd0778d8047185">Restock</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-restock="1b49bcba95d02654969d285b">Restock</button>
             </td>
           </tr>
           <tr>
@@ -3257,7 +3263,7 @@ table.data tbody tr:hover .row-actions {
               <span class="pill pill--low">5 left</span>
             </td>
             <td class="right">
-              <button class="btn btn--ghost btn--sm" type="button" data-restock="40d1a6ec6a6e94bad3550e2b">Restock</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-restock="4f796bcab6c9a6cdbbead852">Restock</button>
             </td>
           </tr>
           <tr>
@@ -3274,7 +3280,7 @@ table.data tbody tr:hover .row-actions {
               <span class="pill pill--low">4 left</span>
             </td>
             <td class="right">
-              <button class="btn btn--ghost btn--sm" type="button" data-restock="dfc01cdf11cbed75e6a27942">Restock</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-restock="af12fb9d14b8df9ed306ef93">Restock</button>
             </td>
           </tr>
           <tr>
@@ -3291,7 +3297,7 @@ table.data tbody tr:hover .row-actions {
               <span class="pill pill--low">6 left</span>
             </td>
             <td class="right">
-              <button class="btn btn--ghost btn--sm" type="button" data-restock="a5f453f3cabbdb19e1436207">Restock</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-restock="6a7184c1128bdf76e93c8491">Restock</button>
             </td>
           </tr>
           <tr>
@@ -3308,7 +3314,7 @@ table.data tbody tr:hover .row-actions {
               <span class="pill pill--low">12 left</span>
             </td>
             <td class="right">
-              <button class="btn btn--ghost btn--sm" type="button" data-restock="9a75da7dab0fc252adc324a5">Restock</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-restock="2d100f45f120946ed2399595">Restock</button>
             </td>
           </tr></tbody></table></div>
       </div>
@@ -3320,6 +3326,8 @@ table.data tbody tr:hover .row-actions {
     <div id="modal-root"></div>
     <div class="toasts" id="toast-root"><div class="toast toast--success"><span class="toast__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></span><div class="grow"><div class="toast__title">Demo workspace ready</div><div class="toast__msg">Sample products, stock and orders are stored locally.</div></div><button class="iconbtn" aria-label="Dismiss"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></div>
 
+    
+    
     
     
     
