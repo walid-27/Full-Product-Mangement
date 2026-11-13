@@ -39,12 +39,50 @@ function buildQuery(query) {
   return str ? `?${str}` : '';
 }
 
+function filenameFromDisposition(value) {
+  if (!value) return null;
+  const match = /filename="([^"]+)"/.exec(String(value)) || /filename=([^;]+)/.exec(String(value));
+  return match ? match[1].trim() : null;
+}
+
 /**
  * Parse a fetch Response into a plain result object.
+ *
+ * With `binary: true` (CSV/XLSX exports, PDF documents) a successful body is
+ * returned as base64 so the main process can save it to disk without ever
+ * corrupting it through a text round-trip. Error bodies stay JSON.
  */
-async function parseResponse(response, startedAt) {
+async function parseResponse(response, startedAt, binary) {
   const contentType = response.headers.get('content-type') || '';
+  const contentDisposition = response.headers.get('content-disposition') || '';
   const ms = Date.now() - startedAt;
+  const cookies = typeof response.headers.getSetCookie === 'function'
+    ? response.headers.getSetCookie()
+    : (response.headers.get('set-cookie') ? [response.headers.get('set-cookie')] : []);
+
+  if (binary && response.ok) {
+    let buffer = Buffer.alloc(0);
+    try {
+      buffer = Buffer.from(await response.arrayBuffer());
+    } catch (err) {
+      buffer = Buffer.alloc(0);
+    }
+    return {
+      ok: true,
+      status: response.status,
+      contentType,
+      data: {
+        base64: buffer.toString('base64'),
+        bytes: buffer.length,
+        contentType,
+        filename: filenameFromDisposition(contentDisposition)
+      },
+      ms,
+      url: response.url,
+      cookies
+    };
+  }
+
   let data = null;
   let raw = '';
 
@@ -73,9 +111,7 @@ async function parseResponse(response, startedAt) {
     data,
     ms,
     url: response.url,
-    cookies: typeof response.headers.getSetCookie === 'function'
-      ? response.headers.getSetCookie()
-      : (response.headers.get('set-cookie') ? [response.headers.get('set-cookie')] : [])
+    cookies
   };
 }
 
@@ -90,6 +126,7 @@ async function parseResponse(response, startedAt) {
  * @param {object} [options.query]        Query string parameters
  * @param {object} [options.body]         JSON body
  * @param {object} [options.form]         Multipart form: { fields, file }
+ * @param {boolean} [options.binary]      Return the body as base64 (exports, PDFs)
  * @param {number} [options.timeout]
  */
 async function request(options) {
@@ -101,12 +138,13 @@ async function request(options) {
     query,
     body,
     form,
+    binary,
     headers: extraHeaders,
     timeout = DEFAULT_TIMEOUT
   } = options || {};
 
   const url = `${joinUrl(baseUrl, apiPath)}${buildQuery(query)}`;
-  const headers = { Accept: 'application/json', ...(extraHeaders || {}) };
+  const headers = { Accept: binary ? '*/*' : 'application/json', ...(extraHeaders || {}) };
   if (token) headers.Authorization = `Bearer ${token}`;
 
   let payload;
@@ -135,7 +173,7 @@ async function request(options) {
       body: payload,
       signal: AbortSignal.timeout(timeout)
     });
-    const result = await parseResponse(response, startedAt);
+    const result = await parseResponse(response, startedAt, Boolean(binary));
     return result;
   } catch (err) {
     const ms = Date.now() - startedAt;
@@ -189,6 +227,23 @@ function errorMessage(result) {
   if (result.error) return result.error;
   const data = result.data;
   if (data && typeof data === 'object') {
+    // Backend validation shape: { code, message, details: [{ path, message }] }
+    if (Array.isArray(data.details) && data.details.length) {
+      const parts = data.details
+        .map((detail) => {
+          if (!detail) return '';
+          if (typeof detail === 'string') return detail;
+          const label = detail.path ? `${detail.path}: ` : '';
+          return `${label}${detail.message || ''}`.trim();
+        })
+        .filter(Boolean);
+      if (parts.length) {
+        const base = typeof data.message === 'string' && data.message.trim()
+          ? data.message.trim()
+          : 'Request validation failed';
+        return `${base} — ${parts.join(' · ')}`;
+      }
+    }
     const message = data.message;
     if (typeof message === 'string' && message.trim()) return message;
     if (message && typeof message === 'object') {
@@ -199,8 +254,11 @@ function errorMessage(result) {
   }
   if (result.status === 0) return 'Network error — server unreachable.';
   if (result.status === 401) return 'Session expired — please sign in again.';
+  if (result.status === 402) return 'Upgrade required — this feature is not available on your plan.';
   if (result.status === 403) return 'Access denied.';
   if (result.status === 404) return 'Not found.';
+  if (result.status === 422) return 'Request validation failed.';
+  if (result.status === 429) return 'Too many requests — please wait and try again.';
   if (result.status >= 500) return `Server error (${result.status}).`;
   return `Request failed (${result.status}).`;
 }
@@ -211,5 +269,6 @@ module.exports = {
   joinUrl,
   buildQuery,
   errorMessage,
-  toBuffer
+  toBuffer,
+  filenameFromDisposition
 };

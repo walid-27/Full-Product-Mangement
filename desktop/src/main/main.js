@@ -82,6 +82,7 @@ function publicSession() {
   return {
     name: session.name || '',
     email: session.email || '',
+    emailVerified: session.emailVerified === undefined ? null : Boolean(session.emailVerified),
     exp: session.exp || null,
     orgId: session.orgId || null,
     orgName: session.orgName || '',
@@ -113,15 +114,20 @@ function saveAuthResult(result, fallback) {
   if (!token) return null;
   const decoded = decodeJwt(token) || {};
   const previous = store.getSession() || {};
+  const organization = payload.organization || {};
   const session = {
     ...previous,
     ...fallback,
     token,
     email: payload.email || (fallback && fallback.email) || previous.email,
     name: payload.name || (fallback && fallback.name) || previous.name,
+    emailVerified: payload.emailVerified === undefined
+      ? previous.emailVerified
+      : Boolean(payload.emailVerified),
     exp: decoded.exp || Math.floor(Date.now() / 1000) + 900,
-    orgId: decoded.orgId || payload.organization?.id || previous.orgId || null,
-    orgName: payload.organization?.name || previous.orgName || '',
+    // Backend organization objects use `_id` (Mongoose); accept `id` too.
+    orgId: decoded.orgId || organization._id || organization.id || previous.orgId || null,
+    orgName: organization.name || previous.orgName || '',
     refreshToken: refreshCookie(result) || previous.refreshToken || null
   };
   store.setSession(session);
@@ -175,6 +181,7 @@ async function performRequest(options) {
     query: opts.query,
     body: opts.body,
     form: opts.form,
+    binary: Boolean(opts.binary),
     timeout: opts.timeout
   };
 
@@ -186,9 +193,15 @@ async function performRequest(options) {
       query: payload.query,
       body: payload.body,
       form: payload.form,
+      binary: payload.binary,
       token: session ? session.token : ''
     });
   } else {
+    const headers = {};
+    // The backend resolves the tenant from the JWT `orgId` claim or the
+    // `x-org-id` header. Send both so a stale claim can never scope a
+    // request to the wrong organization after a switch.
+    if (auth && session && session.orgId) headers['x-org-id'] = String(session.orgId);
     result = await api.request({
       baseUrl: config.apiBaseUrl,
       path: payload.path,
@@ -196,6 +209,8 @@ async function performRequest(options) {
       query: payload.query,
       body: payload.body,
       form: payload.form,
+      binary: payload.binary,
+      headers: Object.keys(headers).length ? headers : undefined,
       token: auth && session ? session.token : undefined,
       timeout: payload.timeout
     });
@@ -213,6 +228,8 @@ async function performRequest(options) {
       ok: false,
       status: result.status,
       data: result.data,
+      code: (result.data && result.data.code) || null,
+      details: (result.data && result.data.details) || null,
       error: message,
       ms: result.ms,
       sessionExpired: expired
@@ -276,8 +293,24 @@ ipcMain.handle('auth:register', async (_event, form) => {
     ? mockApi.handle({ method: 'POST', path: '/auth/register', body })
     : await api.request({ baseUrl: config.apiBaseUrl, path: '/auth/register', method: 'POST', body });
 
-  if (!result.ok) return { ok: false, status: result.status, error: api.errorMessage(result) };
-  return { ok: true, data: result.data };
+  if (!result.ok) {
+    return {
+      ok: false,
+      status: result.status,
+      code: (result.data && result.data.code) || null,
+      details: (result.data && result.data.details) || null,
+      error: api.errorMessage(result)
+    };
+  }
+  // The backend returns a token on register too. Keep the session so the
+  // renderer can show the email-verification step without a second login.
+  const session = saveAuthResult(result, {
+    email: body.email,
+    name: body.name,
+    apiBaseUrl: config.apiBaseUrl,
+    demo: Boolean(config.demoMode)
+  });
+  return { ok: true, data: result.data, session: session ? publicSession() : null };
 });
 
 ipcMain.handle('auth:session', async () => publicSession());
@@ -291,6 +324,22 @@ ipcMain.handle('auth:logout', async () => {
       path: '/auth/logout',
       method: 'POST',
       headers: { Cookie: `refreshToken=${encodeURIComponent(session.refreshToken)}` },
+      timeout: 5000
+    });
+  }
+  store.clearSession();
+  return { ok: true };
+});
+
+ipcMain.handle('auth:logoutAll', async () => {
+  const config = store.get();
+  const session = currentSession();
+  if (!config.demoMode && session) {
+    await api.request({
+      baseUrl: config.apiBaseUrl,
+      path: '/auth/logout-all',
+      method: 'POST',
+      token: session.token,
       timeout: 5000
     });
   }
@@ -320,20 +369,96 @@ ipcMain.handle('api:ping', async () => {
 
   const result = await api.request({
     baseUrl: config.apiBaseUrl,
-    path: '/api/product',
+    path: '/health/ready',
     method: 'GET',
     timeout: 8000
   });
 
-  // A 401/403 proves the server is up (missing/invalid token) — that is a pass.
+  // /health/ready is public and reports MongoDB readiness (200 or 503).
+  // Any HTTP answer proves the server is up; only a network failure fails.
   const reachable = result.status > 0 && result.status < 500;
   return {
     ok: reachable,
     status: result.status,
     ms: Date.now() - startedAt,
-    url: api.joinUrl(config.apiBaseUrl, '/api/product'),
+    url: api.joinUrl(config.apiBaseUrl, '/health/ready'),
     error: reachable ? null : api.errorMessage(result)
   };
+});
+
+/**
+ * Binary download (CSV/XLSX exports, PDF invoices/labels, account export).
+ * The renderer never sees the bytes: the main process fetches them with the
+ * stored JWT and writes them to a file the user picks.
+ */
+ipcMain.handle('api:download', async (_event, options) => {
+  const opts = options || {};
+  const config = store.get();
+  const session = currentSession();
+  const fallbackName = String(opts.filename || 'download.bin').replace(/[\\/:*?"<>|]/g, '_');
+
+  if (!config.demoMode && !session) {
+    return { ok: false, status: 401, error: 'Please sign in to continue.' };
+  }
+
+  let result;
+  if (config.demoMode) {
+    result = mockApi.handle({
+      method: opts.method || 'GET',
+      path: opts.path,
+      query: opts.query,
+      body: opts.body,
+      binary: true,
+      token: session ? session.token : ''
+    });
+  } else {
+    const headers = {};
+    if (session && session.orgId) headers['x-org-id'] = String(session.orgId);
+    result = await api.request({
+      baseUrl: config.apiBaseUrl,
+      path: opts.path,
+      method: opts.method || 'GET',
+      query: opts.query,
+      body: opts.body,
+      binary: true,
+      headers: Object.keys(headers).length ? headers : undefined,
+      token: session ? session.token : undefined,
+      timeout: opts.timeout
+    });
+  }
+
+  if (!result.ok) {
+    return {
+      ok: false,
+      status: result.status,
+      code: (result.data && result.data.code) || null,
+      details: (result.data && result.data.details) || null,
+      error: api.errorMessage(result)
+    };
+  }
+
+  const payload = result.data || {};
+  const buffer = payload.base64 ? Buffer.from(payload.base64, 'base64') : Buffer.alloc(0);
+  const suggested = payload.filename || fallbackName;
+
+  let target;
+  if (dialog && typeof dialog.showSaveDialog === 'function') {
+    const parent = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
+    const choice = parent
+      ? await dialog.showSaveDialog(parent, { defaultPath: suggested })
+      : await dialog.showSaveDialog({ defaultPath: suggested });
+    if (!choice || choice.canceled || !choice.filePath) return { ok: false, canceled: true };
+    target = choice.filePath;
+  } else {
+    target = path.join(app.getPath('downloads'), suggested);
+  }
+
+  try {
+    fs.writeFileSync(target, buffer);
+  } catch (err) {
+    return { ok: false, error: `Could not save the file: ${err.message}` };
+  }
+  return { ok: true, filePath: target, bytes: buffer.length, filename: path.basename(target) };
 });
 
 /* ------------------------------------------------------- IPC: settings */

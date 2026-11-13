@@ -54,18 +54,21 @@ const productForm = (fields, file) => ({
   await test('rejects unauthenticated product listing with 401', () => {
     const response = call('GET', '/api/product', { token: '' });
     assert.strictEqual(response.status, 401);
-    assert.match(response.data.message, /verife your access/);
+    assert.match(response.data.message, /Authentication required/);
+    assert.strictEqual(response.data.code, 'AUTH_REQUIRED');
   });
 
-  await test('rejects a bad token with 403', () => {
+  await test('rejects a bad token with 401', () => {
     const response = call('GET', '/api/product', { token: 'nope' });
-    assert.strictEqual(response.status, 403);
+    assert.strictEqual(response.status, 401);
+    assert.strictEqual(response.data.code, 'INVALID_TOKEN');
   });
 
   await test('rejects wrong credentials', () => {
     const response = call('POST', '/auth/login', { body: { email: mock.DEMO_EMAIL, password: 'wrong' }, token: '' });
-    assert.strictEqual(response.status, 400);
-    assert.match(response.data.message, /invalaid/);
+    assert.strictEqual(response.status, 401);
+    assert.match(response.data.message, /invalid/i);
+    assert.strictEqual(response.data.code, 'INVALID_CREDENTIALS');
   });
 
   await test('logs the demo user in and returns a token', () => {
@@ -125,8 +128,9 @@ const productForm = (fields, file) => ({
     const response = call('POST', '/api/product', {
       form: productForm({ name: 'Test widget', price: '900' })
     });
-    assert.strictEqual(response.status, 400);
-    assert.match(response.data.message, /exsit product/);
+    assert.strictEqual(response.status, 409);
+    assert.match(response.data.message, /already exists/i);
+    assert.strictEqual(response.data.code, 'PRODUCT_EXISTS');
   });
 
   await test('stocks a product in and reports the movement', () => {
@@ -171,8 +175,9 @@ const productForm = (fields, file) => ({
         userInfo: { name: 'Test', number: '12345', city: 'Alger', address: 'Rue 1', delivery: 'Domicile' }
       }
     });
-    assert.strictEqual(response.status, 400);
-    assert.match(response.data.message, /phone/i);
+    assert.strictEqual(response.status, 422);
+    assert.strictEqual(response.data.code, 'VALIDATION_ERROR');
+    assert.match(JSON.stringify(response.data.details || []), /phone/i);
   });
 
   await test('rejects orders exceeding stock', () => {
@@ -229,7 +234,7 @@ const productForm = (fields, file) => ({
   });
 
   await test('validates status transitions and updates them', () => {
-    assert.strictEqual(call('PATCH', `/api/order/status/${order._id}`, { body: { status: 'bogus' } }).status, 400);
+    assert.strictEqual(call('PATCH', `/api/order/status/${order._id}`, { body: { status: 'bogus' } }).status, 422);
 
     const response = call('PATCH', `/api/order/status/${order._id}`, { body: { status: 'confirmed' } });
     assert.strictEqual(response.status, 200);
@@ -305,27 +310,122 @@ const productForm = (fields, file) => ({
 
   await test('registers a new user and blocks duplicates', () => {
     const created2 = call('POST', '/auth/register', {
-      body: { name: 'New Manager', email: 'new@stockflow.app', password: 'secret123' },
+      body: { name: 'New Manager', email: 'new@stockflow.app', password: 'ManagerPass123' },
       token: ''
     });
     assert.strictEqual(created2.status, 201);
     assert.strictEqual(created2.data.register.email, 'new@stockflow.app');
 
     const duplicate = call('POST', '/auth/register', {
-      body: { name: 'New Manager', email: 'new@stockflow.app', password: 'secret123' },
+      body: { name: 'New Manager', email: 'new@stockflow.app', password: 'ManagerPass123' },
       token: ''
     });
-    assert.strictEqual(duplicate.status, 400);
+    assert.strictEqual(duplicate.status, 409);
+    assert.strictEqual(duplicate.data.code, 'USER_EXISTS');
 
     const shortPassword = call('POST', '/auth/register', {
       body: { name: 'X', email: 'x@stockflow.app', password: '123' },
       token: ''
     });
-    assert.strictEqual(shortPassword.status, 400);
+    assert.strictEqual(shortPassword.status, 422);
+    assert.strictEqual(shortPassword.data.code, 'VALIDATION_ERROR');
 
-    const login = call('POST', '/auth/login', { body: { email: 'new@stockflow.app', password: 'secret123' }, token: '' });
+    const login = call('POST', '/auth/login', { body: { email: 'new@stockflow.app', password: 'ManagerPass123' }, token: '' });
     assert.strictEqual(login.status, 200);
     assert.ok(login.data.register.token);
+  });
+
+  await test('serves dashboard aggregates under the /api/v1 aliases', () => {
+    const products = call('GET', '/api/v1/dashboard/product');
+    assert.strictEqual(products.status, 200);
+    assert.ok(products.data.totalProduct > 0);
+    assert.ok('totalStock' in products.data && 'totalPrices' in products.data);
+
+    const orders = call('GET', '/api/v1/dashboard/order');
+    assert.strictEqual(orders.status, 200);
+    assert.ok(orders.data.totalOrder > 0);
+    assert.ok('totalRevenue' in orders.data);
+  });
+
+  await test('serves feature reports, movements and global search', () => {
+    const sales = call('GET', '/api/v1/features/reports/sales');
+    assert.strictEqual(sales.status, 200);
+    assert.ok(Array.isArray(sales.data));
+
+    const movements = call('GET', '/api/v1/features/reports/movements', { query: { limit: 5 } });
+    assert.strictEqual(movements.status, 200);
+    assert.ok(Array.isArray(movements.data.movements));
+    assert.ok(movements.data.pagination.total >= movements.data.movements.length);
+
+    const search = call('GET', '/api/v1/search', { query: { q: 'casque' } });
+    assert.strictEqual(search.status, 200);
+    assert.ok(search.data.products.length >= 1);
+    assert.ok(Array.isArray(search.data.orders));
+  });
+
+  await test('exports CSV and order documents as downloads', () => {
+    const exported = call('GET', '/api/v1/features/export/products', { query: { format: 'csv' } });
+    assert.strictEqual(exported.status, 200);
+    assert.ok(exported.binary || exported.data, 'export returns a payload');
+
+    const anyOrder = call('GET', '/api/order', { query: { limit: 1 } }).data.Orders.orders[0];
+    const invoice = call('GET', `/api/v1/features/orders/${anyOrder._id}/documents/invoice`);
+    assert.strictEqual(invoice.status, 200);
+
+    const shipment = call('POST', `/api/v1/features/orders/${anyOrder._id}/shipment`, { body: {} });
+    assert.strictEqual(shipment.status, 201);
+    assert.ok(shipment.data.trackingId);
+  });
+
+  await test('imports products from CSV', () => {
+    const csv = 'name,price,category\nImported Widget,750,Testing\n';
+    const response = call('POST', '/api/v1/features/products/import', {
+      form: { fields: {}, file: { name: 'products.csv', type: 'text/csv', data: new TextEncoder().encode(csv) } }
+    });
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(response.data.imported, 1);
+    const found = call('GET', '/api/product', { query: { search: 'Imported Widget' } });
+    assert.strictEqual(found.data.products.length, 1);
+  });
+
+  await test('serves billing, API keys, webhooks and account data', () => {
+    const usage = call('GET', '/api/billing/usage');
+    assert.strictEqual(usage.status, 200);
+    assert.ok('products' in usage.data && 'features' in usage.data);
+
+    const checkout = call('POST', '/api/billing/checkout', { body: { plan: 'pro' } });
+    assert.strictEqual(checkout.status, 201);
+    assert.ok(checkout.data.checkoutUrl);
+
+    const key = call('POST', '/api/api-keys', { body: { name: 'Test key', scopes: ['read'], rateLimitPerMinute: 60 } });
+    assert.strictEqual(key.status, 201);
+    assert.ok(key.data.key, 'raw key is shown once');
+    const keys = call('GET', '/api/api-keys');
+    assert.ok(keys.data.some((item) => item.name === 'Test key' && !item.key), 'listed keys hide the secret');
+
+    const hook = call('POST', '/api/webhooks', { body: { url: 'https://example.com/hook', events: ['order.created'] } });
+    assert.strictEqual(hook.status, 201);
+    assert.ok(hook.data.secret, 'webhook secret is shown once');
+
+    const onboarding = call('GET', '/api/account/onboarding');
+    assert.strictEqual(onboarding.status, 200);
+    assert.ok(Array.isArray(onboarding.data.checklist));
+
+    const exported = call('GET', '/api/account/export');
+    assert.strictEqual(exported.status, 200);
+    assert.ok(exported.data.user && Array.isArray(exported.data.products));
+  });
+
+  await test('restores a soft-deleted product', () => {
+    const created3 = call('POST', '/api/product', {
+      form: productForm({ name: 'Restore widget', price: '300' })
+    });
+    assert.strictEqual(created3.status, 201);
+    const id = created3.data.product.Product._id;
+    assert.strictEqual(call('DELETE', `/api/product/${id}`).status, 200);
+    assert.strictEqual(call('GET', '/api/product', { query: { search: 'Restore widget' } }).data.products.length, 0);
+    assert.strictEqual(call('POST', `/api/product/${id}/restore`).status, 200);
+    assert.strictEqual(call('GET', '/api/product', { query: { search: 'Restore widget' } }).data.products.length, 1);
   });
 
   await test('reset() restores the seeded workspace', () => {

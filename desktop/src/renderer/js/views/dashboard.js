@@ -278,7 +278,20 @@
     let lowStock = [];
     let outOfStock = [];
 
+    let serverProducts = null;
+    let serverOrders = null;
+    let onboarding = null;
     try {
+      // Server aggregates (dashboard + onboarding) are best-effort: the
+      // client-side totals below remain the fallback for older backends.
+      const [serverProductResult, serverOrderResult, onboardingResult] = await Promise.all([
+        App.api.dashboard.products().catch(() => null),
+        App.api.dashboard.orders().catch(() => null),
+        App.api.account.onboarding().catch(() => null)
+      ]);
+      serverProducts = serverProductResult;
+      serverOrders = serverOrderResult;
+      onboarding = onboardingResult;
       const results = await Promise.all([
         App.api.products.all(),
         App.api.orders.all(),
@@ -304,22 +317,39 @@
     App.state.outOfStock = outOfStock;
     App.updateNavCounts();
 
-    const totalStock = products.reduce((sum, product) => sum + (Number(product.stock) || 0), 0);
-    const stockValue = products.reduce(
+    const clientStock = products.reduce((sum, product) => sum + (Number(product.stock) || 0), 0);
+    const clientValue = products.reduce(
       (sum, product) => sum + (Number(product.price) || 0) * (Number(product.stock) || 0),
       0
     );
-    const categories = new Set(products.map((product) => (product.category || '').trim()).filter(Boolean));
-    const deliveredRevenue = orders
+    const clientRevenue = orders
       .filter((order) => order.status === 'delivered')
       .reduce((sum, order) => sum + (Number(order.totalPrice) || 0), 0);
+    // Prefer the server aggregates when the backend provides them.
+    const totalStock = serverProducts && Number.isFinite(Number(serverProducts.totalStock))
+      ? Number(serverProducts.totalStock)
+      : clientStock;
+    const stockValue = serverProducts && Number.isFinite(Number(serverProducts.totalPrices))
+      ? Number(serverProducts.totalPrices)
+      : clientValue;
+    const deliveredRevenue = serverOrders && Number.isFinite(Number(serverOrders.totalRevenue))
+      ? Number(serverOrders.totalRevenue)
+      : clientRevenue;
+    const productCount = serverProducts && Number.isFinite(Number(serverProducts.totalProduct))
+      ? Number(serverProducts.totalProduct)
+      : products.length;
+    const categories = new Set(products.map((product) => (product.category || '').trim()).filter(Boolean));
     const openOrders = orders.filter((order) => ['pending', 'confirmed', 'shipped'].includes(order.status)).length;
     const addedRecently = products.filter((product) => {
       const created = App.util.toDate(product.createdAt);
       return created && Date.now() - created.getTime() < 30 * 24 * 60 * 60 * 1000;
     }).length;
+    const checklist = onboarding && Array.isArray(onboarding.checklist) ? onboarding.checklist : null;
 
     if (!products.length && !orders.length) {
+      const checklistMarkup = checklist
+        ? `<div class="col" style="gap:6px;margin-top:12px">${checklist.map((step) => `<div class="row" style="gap:8px;font-size:12.5px"><span>${step.complete ? App.icon('check', 14) : App.icon('dot', 14)}</span><span class="${step.complete ? '' : 'mute'}">${esc(step.step)}</span></div>`).join('')}</div>`
+        : '';
       container.innerHTML = `<div class="view__inner">
         <div class="card"><div class="card__body">
           ${ui.emptyState({
@@ -329,6 +359,7 @@
             actionLabel: 'Create your first product',
             onAction: () => App.views.products.openCreate()
           }).outerHTML}
+          ${checklistMarkup}
         </div></div>
       </div>`;
       return;
@@ -350,7 +381,7 @@
           label: 'Products',
           icon: 'box',
           tone: 'accent',
-          value: num(products.length),
+          value: num(productCount),
           meta: `${num(categories.size)} ${App.util.plural(categories.size, 'category', 'categories')} · ${num(addedRecently)} added in 30 days`
         })}
         ${statCard({

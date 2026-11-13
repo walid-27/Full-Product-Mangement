@@ -2773,7 +2773,7 @@ table.data tbody tr:hover .row-actions {
           </div>
 
           <form class="auth-form" id="auth-form" novalidate="">
-            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label></div>
+            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label><div class="row row--between"><button class="btn btn--quiet btn--sm" type="button" id="forgot-link">Forgot password?</button><button class="btn btn--quiet btn--sm" type="button" id="verify-link">Verify email</button></div></div>
             <div id="auth-error" hidden=""></div>
             <button class="btn btn--primary btn--block" type="submit" id="auth-submit">Sign in</button>
           </form>
@@ -2822,17 +2822,23 @@ table.data tbody tr:hover .row-actions {
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h5"></path></svg>
           <span class="nav__text">Orders</span>
           <span class="nav__count" data-count="orders" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="reports">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"></rect><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"></rect></svg>
+          <span class="nav__text">Reports</span>
+          <span class="nav__count" data-count="reports" hidden=""></span>
         </button></nav>
         <div class="sidebar__foot">
-          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item" type="button" data-route="settings">
+          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item" type="button" data-route="team">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+          <span class="nav__text">Team</span>
+          <span class="nav__count" data-count="team" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="settings">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path></svg>
           <span class="nav__text">Settings</span>
           <span class="nav__count" data-count="settings" hidden=""></span>
         </button></nav>
-          <button class="userchip" id="userchip" type="button" title="Account and settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
-        <span class="userchip__name">Demo Manager</span>
-        <span class="userchip__mail">demo@stockflow.app</span>
-      </span></button>
+          <div class="userchip" id="userchip" role="button" tabindex="0" title="Account and organization settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
+        <span class="userchip__name">Demo Manager</span><span class="userchip__mail">Demo Organization</span></span></div>
         </div>
       </aside>
 
@@ -2882,10 +2888,10 @@ table.data tbody tr:hover .row-actions {
             </tr>
           </thead>
           <tbody>
-          <tr data-id="c5e590ac65f51d7919fe26df">
+          <tr data-id="5d80715b8d6f1cc8351106e1">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#FE26DF</div>
+                <div class="cell-title mono">#1106E1</div>
                 <div class="cell-sub">just now</div>
               </div>
             </td>
@@ -2905,7 +2911,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">2</td>
             <td class="num strong">23,100 DZD</td>
             <td><span class="pill pill--pending"><span class="dot"></span>pending</span></td>
-            <td class="right mute small nowrap">8 Nov</td>
+            <td class="right mute small nowrap">12 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -2914,10 +2920,10 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="8f347ebc8d882fdc609555d0">
+          <tr data-id="571edd91869900ec906dd885">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#9555D0</div>
+                <div class="cell-title mono">#6DD885</div>
                 <div class="cell-sub">2 d ago</div>
               </div>
             </td>
@@ -2937,7 +2943,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">2</td>
             <td class="num strong">17,400 DZD</td>
             <td><span class="pill pill--confirmed"><span class="dot"></span>confirmed</span></td>
-            <td class="right mute small nowrap">6 Nov</td>
+            <td class="right mute small nowrap">10 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -2946,10 +2952,10 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="5543b71cd6ab633cc38ec259">
+          <tr data-id="bef75ad892478deeddd41e88">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#8EC259</div>
+                <div class="cell-title mono">#D41E88</div>
                 <div class="cell-sub">3 d ago</div>
               </div>
             </td>
@@ -2969,7 +2975,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">3</td>
             <td class="num strong">44,200 DZD</td>
             <td><span class="pill pill--delivered"><span class="dot"></span>delivered</span></td>
-            <td class="right mute small nowrap">5 Nov</td>
+            <td class="right mute small nowrap">9 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -2978,10 +2984,10 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="91721bb4c1d8ec12e8133bfc">
+          <tr data-id="f57d4a6c15a3ac840b174359">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#133BFC</div>
+                <div class="cell-title mono">#174359</div>
                 <div class="cell-sub">4 d ago</div>
               </div>
             </td>
@@ -3001,7 +3007,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">1</td>
             <td class="num strong">6,900 DZD</td>
             <td><span class="pill pill--shipped"><span class="dot"></span>shipped</span></td>
-            <td class="right mute small nowrap">4 Nov</td>
+            <td class="right mute small nowrap">8 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3010,10 +3016,10 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="ecb8412607df9b4fda4eab6a">
+          <tr data-id="07cf03af8d3c36ca8d5979eb">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#4EAB6A</div>
+                <div class="cell-title mono">#5979EB</div>
                 <div class="cell-sub">5 d ago</div>
               </div>
             </td>
@@ -3033,7 +3039,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">1</td>
             <td class="num strong">5,600 DZD</td>
             <td><span class="pill pill--delivered"><span class="dot"></span>delivered</span></td>
-            <td class="right mute small nowrap">3 Nov</td>
+            <td class="right mute small nowrap">7 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3042,11 +3048,11 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="c00aa7a7916ecd656901b468">
+          <tr data-id="1d1fcbcded79c4a29bb4f502">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#01B468</div>
-                <div class="cell-sub">1 Nov</div>
+                <div class="cell-title mono">#B4F502</div>
+                <div class="cell-sub">5 Nov</div>
               </div>
             </td>
             <td>
@@ -3065,7 +3071,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">2</td>
             <td class="num strong">23,100 DZD</td>
             <td><span class="pill pill--pending"><span class="dot"></span>pending</span></td>
-            <td class="right mute small nowrap">1 Nov</td>
+            <td class="right mute small nowrap">5 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3074,11 +3080,11 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="dfa47eaa09845f1f2fde0869">
+          <tr data-id="8d430d5df1726e10b13e15e9">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#DE0869</div>
-                <div class="cell-sub">31 Oct</div>
+                <div class="cell-title mono">#3E15E9</div>
+                <div class="cell-sub">4 Nov</div>
               </div>
             </td>
             <td>
@@ -3097,7 +3103,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">2</td>
             <td class="num strong">3,300 DZD</td>
             <td><span class="pill pill--cancelled"><span class="dot"></span>cancelled</span></td>
-            <td class="right mute small nowrap">31 Oct</td>
+            <td class="right mute small nowrap">4 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3106,11 +3112,11 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="9ce352825319a8364ace97ad">
+          <tr data-id="08c8cc3707206e1bb237a67a">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#CE97AD</div>
-                <div class="cell-sub">30 Oct</div>
+                <div class="cell-title mono">#37A67A</div>
+                <div class="cell-sub">3 Nov</div>
               </div>
             </td>
             <td>
@@ -3129,7 +3135,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">2</td>
             <td class="num strong">7,200 DZD</td>
             <td><span class="pill pill--confirmed"><span class="dot"></span>confirmed</span></td>
-            <td class="right mute small nowrap">30 Oct</td>
+            <td class="right mute small nowrap">3 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3138,11 +3144,11 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="760674310e9d6f9f40681232">
+          <tr data-id="c6ff8799de56964d821b7e97">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#681232</div>
-                <div class="cell-sub">28 Oct</div>
+                <div class="cell-title mono">#1B7E97</div>
+                <div class="cell-sub">1 Nov</div>
               </div>
             </td>
             <td>
@@ -3161,7 +3167,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">1</td>
             <td class="num strong">7,400 DZD</td>
             <td><span class="pill pill--shipped"><span class="dot"></span>shipped</span></td>
-            <td class="right mute small nowrap">28 Oct</td>
+            <td class="right mute small nowrap">1 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3170,11 +3176,11 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="68691095c330207a01430a9f">
+          <tr data-id="20ccb7c3176ac7eaec2b0606">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#430A9F</div>
-                <div class="cell-sub">28 Oct</div>
+                <div class="cell-title mono">#2B0606</div>
+                <div class="cell-sub">1 Nov</div>
               </div>
             </td>
             <td>
@@ -3193,7 +3199,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">3</td>
             <td class="num strong">9,450 DZD</td>
             <td><span class="pill pill--delivered"><span class="dot"></span>delivered</span></td>
-            <td class="right mute small nowrap">28 Oct</td>
+            <td class="right mute small nowrap">1 Nov</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3202,11 +3208,11 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="8eb7fa70f077965df2187165">
+          <tr data-id="261ef81cb78593bd8fd08adc">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#187165</div>
-                <div class="cell-sub">26 Oct</div>
+                <div class="cell-title mono">#D08ADC</div>
+                <div class="cell-sub">30 Oct</div>
               </div>
             </td>
             <td>
@@ -3225,7 +3231,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">1</td>
             <td class="num strong">2,850 DZD</td>
             <td><span class="pill pill--delivered"><span class="dot"></span>delivered</span></td>
-            <td class="right mute small nowrap">26 Oct</td>
+            <td class="right mute small nowrap">30 Oct</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3234,11 +3240,11 @@ table.data tbody tr:hover .row-actions {
               </div>
             </td>
           </tr>
-          <tr data-id="31499a60497355bc8033f5c9">
+          <tr data-id="9937ea4aa77baf6522cf8fa3">
             <td>
               <div class="cell-main__text">
-                <div class="cell-title mono">#33F5C9</div>
-                <div class="cell-sub">25 Oct</div>
+                <div class="cell-title mono">#CF8FA3</div>
+                <div class="cell-sub">29 Oct</div>
               </div>
             </td>
             <td>
@@ -3257,7 +3263,7 @@ table.data tbody tr:hover .row-actions {
             <td class="num">2</td>
             <td class="num strong">8,150 DZD</td>
             <td><span class="pill pill--pending"><span class="dot"></span>pending</span></td>
-            <td class="right mute small nowrap">25 Oct</td>
+            <td class="right mute small nowrap">29 Oct</td>
             <td class="actions">
               <div class="row-actions">
                 <button class="iconbtn" type="button" data-act="view" title="Order details"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
@@ -3274,12 +3280,12 @@ table.data tbody tr:hover .row-actions {
       </main>
     </div>
 
-    <div id="modal-root"><div class="overlay"><div class="drawer" role="dialog" aria-modal="true"><div class="modal__head"><div><div class="modal__title">Order #FE26DF</div><div class="modal__sub">Customer and item details</div></div><button class="iconbtn" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><div class="modal__body"><div class="col" style="gap:16px">
+    <div id="modal-root"><div class="overlay"><div class="drawer" role="dialog" aria-modal="true"><div class="modal__head"><div><div class="modal__title">Order #1106E1</div><div class="modal__sub">Customer and item details</div></div><button class="iconbtn" type="button" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div><div class="modal__body"><div class="col" style="gap:16px">
         <div class="row" style="gap:12px;align-items:center">
           <span class="avatar" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">AB</span>
           <div class="grow">
             <div class="strong" style="font-size:14px">Amine Belkacem</div>
-            <div class="small mute">#FE26DF · 8 Nov, 19:36</div>
+            <div class="small mute">#1106E1 · 12 Nov, 22:51</div>
           </div>
           <span class="pill pill--pending"><span class="dot"></span>pending</span>
         </div>
@@ -3324,6 +3330,13 @@ table.data tbody tr:hover .row-actions {
           <div class="summary__line summary__line--total"><span>Order total</span><span>23,100 DZD</span></div>
         </div>
 
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <button class="btn btn--ghost btn--sm" type="button" data-doc="invoice"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 20h16"></path></svg> Invoice PDF</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-doc="label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12"></path><path d="m7 11 5 5 5-5"></path><path d="M4 20h16"></path></svg> Delivery label</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-shipment=""><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4h13v12H1z"></path><path d="M14 8h4l3 3v5h-7"></path><circle cx="5.5" cy="18.5" r="2"></circle><circle cx="17.5" cy="18.5" r="2"></circle></svg> Create shipment</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-delete=""><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg> Delete order</button>
+        </div>
+
         <div id="detail-error" hidden=""></div>
       </div></div><div class="modal__foot"><div class="row" style="justify-content:space-between;gap:9px;width:100%">
         <button class="btn btn--danger btn--sm" type="button" data-cancel="">
@@ -3336,6 +3349,8 @@ table.data tbody tr:hover .row-actions {
       </div></div></div></div></div>
     <div class="toasts" id="toast-root"><div class="toast toast--success"><span class="toast__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></span><div class="grow"><div class="toast__title">Demo workspace ready</div><div class="toast__msg">Sample products, stock and orders are stored locally.</div></div><button class="iconbtn" aria-label="Dismiss"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></div>
 
+    
+    
     
     
     

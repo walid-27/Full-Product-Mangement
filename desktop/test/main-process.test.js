@@ -268,7 +268,7 @@ function listen(handler) {
   await test('rejects bad credentials in demo mode', async () => {
     const login = await call('auth:login', { email: 'demo@stockflow.app', password: 'nope' });
     assert.strictEqual(login.ok, false);
-    assert.match(login.error, /invalaid/);
+    assert.match(login.error, /invalid/i);
   });
 
   await test('proxies API calls with the stored token (demo backend)', async () => {

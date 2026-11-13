@@ -240,10 +240,11 @@
     const itemRows = items
       .map((item) => {
         const lineTotal = (Number(item.price) || 0) * (Number(item.quantity) || 0);
+        const variant = item.variantSku ? ` · ${esc(item.variantSku)}` : '';
         return `
           <div class="items__row">
             <div class="grow" style="min-width:0">
-              <div class="items__name">${esc(productName(item.product))}</div>
+              <div class="items__name">${esc(productName(item.product))}${variant}</div>
               <div class="items__meta">${num(item.price)} DZD × ${num(item.quantity)}</div>
             </div>
             <div class="items__price">${money(lineTotal)}</div>
@@ -296,6 +297,13 @@
           <div class="summary__line summary__line--total"><span>Order total</span><span>${money(total)}</span></div>
         </div>
 
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <button class="btn btn--ghost btn--sm" type="button" data-doc="invoice">${App.icon('download', 13)} Invoice PDF</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-doc="label">${App.icon('download', 13)} Delivery label</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-shipment>${App.icon('truck', 13)} Create shipment</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-delete>${App.icon('trash', 13)} Delete order</button>
+        </div>
+
         <div id="detail-error" hidden></div>
       </div>
     `);
@@ -331,6 +339,68 @@
       cancelBtn.addEventListener('click', () => {
         ref.close();
         cancelOrder(order);
+      });
+    }
+
+    const detailError = body.querySelector('#detail-error');
+    const showDetailError = (message) => {
+      if (!detailError) return;
+      detailError.hidden = false;
+      detailError.innerHTML = ui.alertBox('error', esc(message));
+    };
+
+    body.querySelectorAll('[data-doc]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        ui.setBusy(button, true);
+        try {
+          const saved = await App.api.orders.document(order._id, button.getAttribute('data-doc'));
+          if (saved) ui.toast({ type: 'success', title: 'Document saved', message: saved.filename || 'PDF downloaded.' });
+        } catch (error) {
+          showDetailError(error.message);
+        } finally {
+          ui.setBusy(button, false);
+        }
+      });
+    });
+
+    const shipmentBtn = body.querySelector('[data-shipment]');
+    if (shipmentBtn) {
+      shipmentBtn.addEventListener('click', async () => {
+        ui.setBusy(shipmentBtn, true);
+        try {
+          const shipment = await App.api.orders.shipment(order._id);
+          ui.toast({
+            type: 'success',
+            title: 'Shipment created',
+            message: `Tracking ${shipment.trackingId || ''} via ${shipment.provider || 'delivery provider'}.`
+          });
+        } catch (error) {
+          showDetailError(error.message);
+        } finally {
+          ui.setBusy(shipmentBtn, false);
+        }
+      });
+    }
+
+    const deleteBtn = body.querySelector('[data-delete]');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        const confirmed = await ui.confirm({
+          title: 'Delete this order?',
+          message: `Order #${shortId(order._id)} will be hidden. An administrator can restore it later.`,
+          confirmText: 'Delete order',
+          danger: true
+        });
+        if (!confirmed) return;
+        try {
+          await App.api.orders.remove(order._id);
+          ui.toast({ type: 'success', title: 'Order deleted', message: 'The order was hidden from the list.' });
+          ref.close();
+          await loadList();
+          if (App.refreshNavCounts) App.refreshNavCounts();
+        } catch (error) {
+          showDetailError(error.message);
+        }
       });
     }
   }

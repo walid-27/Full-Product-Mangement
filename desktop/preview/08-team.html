@@ -2,7 +2,7 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>StockFlow — Settings</title>
+    <title>StockFlow — Team</title>
     <style>
 /* =========================================================================
    StockFlow — desktop design system
@@ -2773,7 +2773,7 @@ table.data tbody tr:hover .row-actions {
           </div>
 
           <form class="auth-form" id="auth-form" novalidate="">
-            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label></div>
+            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label><div class="row row--between"><button class="btn btn--quiet btn--sm" type="button" id="forgot-link">Forgot password?</button><button class="btn btn--quiet btn--sm" type="button" id="verify-link">Verify email</button></div></div>
             <div id="auth-error" hidden=""></div>
             <button class="btn btn--primary btn--block" type="submit" id="auth-submit">Sign in</button>
           </form>
@@ -2822,279 +2822,48 @@ table.data tbody tr:hover .row-actions {
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h5"></path></svg>
           <span class="nav__text">Orders</span>
           <span class="nav__count" data-count="orders" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="reports">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"></rect><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"></rect></svg>
+          <span class="nav__text">Reports</span>
+          <span class="nav__count" data-count="reports" hidden=""></span>
         </button></nav>
         <div class="sidebar__foot">
-          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item is-active" type="button" data-route="settings">
+          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item is-active" type="button" data-route="team">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+          <span class="nav__text">Team</span>
+          <span class="nav__count" data-count="team" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="settings">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path></svg>
           <span class="nav__text">Settings</span>
           <span class="nav__count" data-count="settings" hidden=""></span>
         </button></nav>
-          <button class="userchip" id="userchip" type="button" title="Account and settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
-        <span class="userchip__name">Demo Manager</span>
-        <span class="userchip__mail">demo@stockflow.app</span>
-      </span></button>
+          <div class="userchip" id="userchip" role="button" tabindex="0" title="Account and organization settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
+        <span class="userchip__name">Demo Manager</span><span class="userchip__mail">Demo Organization</span></span></div>
         </div>
       </aside>
 
       <main class="main">
         <header class="pagehead">
           <div class="grow">
-            <h1 id="page-title">Settings</h1>
-            <p class="pagehead__sub" id="page-sub">Connection, appearance and local data.</p>
+            <h1 id="page-title">Team</h1>
+            <p class="pagehead__sub" id="page-sub">Members and invitations for the active organization</p>
           </div>
-          <div class="pagehead__actions" id="page-actions"><button type="button" class="btn btn--quiet btn--icon" title="Refresh (Ctrl+R)" aria-label="Refresh"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></svg></button></div>
+          <div class="pagehead__actions" id="page-actions"><button type="button" class="btn btn--primary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg><span>Invite member</span></button><button type="button" class="btn btn--quiet btn--icon" title="Refresh (Ctrl+R)" aria-label="Refresh"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></svg></button></div>
         </header>
-        <div class="view" id="view"><div class="view__inner">
-      <div class="settings-grid">
-        <div class="col" style="gap:14px">
-          <div class="card">
-            <div class="card__head">
-              <div>
-                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"></path><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"></path></svg> API connection</div>
-                <div class="card__sub">Where your products, stock and orders live</div>
-              </div>
-              <span class="status-line" id="conn-badge"><span class="status-dot is-ok"></span>Demo mode</span>
-            </div>
-            <div class="card__body">
-              <div class="form-grid">
-                <label class="field span-2">
-                  <span class="field__label">API base URL</span>
-                  <div class="row" style="gap:8px">
-                    <input class="input" id="api-base" value="http://localhost:5000" placeholder="http://localhost:5000" spellcheck="false" disabled="">
-                    <button class="btn btn--ghost" type="button" id="test-conn" disabled="">Test</button>
-                    <button class="btn btn--primary" type="button" id="save-conn" disabled="">Save</button>
-                  </div>
-                  <span class="field__hint">Example: <span class="mono">http://localhost:5000</span> or your hosted API address. Changing it signs you out.</span>
-                </label>
-                <label class="field span-2">
-                  <span class="field__label">Product images path</span>
-                  <input class="input" id="uploads-path" value="/uploads" placeholder="/uploads" spellcheck="false">
-                  <span class="field__hint">Optional. Images you upload are cached on this computer; this path is only used to fetch older images over HTTP (or a full URL such as <span class="mono">https://cdn.example.com/uploads</span>).</span>
-                </label>
-              </div>
-              <div id="conn-result" style="margin-top:12px"></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card__head">
-              <div>
-                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9Z"></path><path d="m19 15 .7 1.8 1.8.7-1.8.7L19 20l-.7-1.8-1.8-.7 1.8-.7Z"></path></svg> Data source</div>
-                <div class="card__sub">Demo mode runs entirely on this computer</div>
-              </div>
-            </div>
-            <div class="card__body" style="padding-top:4px;padding-bottom:4px">
-              
-      <div class="setting-row">
-        <div class="setting-row__text">
-          <div class="setting-row__title">Demo workspace</div>
-          <div class="setting-row__desc">Use realistic sample products, stock and orders stored locally — perfect for trying the interface without MongoDB or the API running. Your real API data is never touched.</div>
-        </div>
-        <div class="setting-row__control"><label class="switch"><input type="checkbox" id="demo-toggle" checked="">
-                  <span class="switch__track"></span><span class="switch__text">On</span></label></div>
-      </div>
-              
-      <div class="setting-row">
-        <div class="setting-row__text">
-          <div class="setting-row__title">Reset demo data</div>
-          <div class="setting-row__desc">Restore the sample catalogue and orders to their initial state.</div>
-        </div>
-        <div class="setting-row__control"><button class="btn btn--ghost btn--sm" type="button" id="reset-demo">Reset</button></div>
-      </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card__head">
-              <div>
-                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="8.5" cy="10" r="1.1"></circle><circle cx="12" cy="7.8" r="1.1"></circle><circle cx="15.5" cy="10" r="1.1"></circle><path d="M12 21a3 3 0 0 1 0-6 2 2 0 0 0 0-4"></path></svg> Appearance</div>
-                <div class="card__sub">Theme applies instantly</div>
-              </div>
-            </div>
-            <div class="card__body" style="padding-top:4px;padding-bottom:4px">
-              
-      <div class="setting-row">
-        <div class="setting-row__text">
-          <div class="setting-row__title">Theme</div>
-          <div class="setting-row__desc">Dark is easier on the eyes for long inventory sessions; light suits bright offices.</div>
-        </div>
-        <div class="setting-row__control"><div class="segmented" id="theme-tabs">
-                   <button type="button" class="segmented__btn is-active" data-theme="dark">
-                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg> Dark
-                   </button>
-                   <button type="button" class="segmented__btn " data-theme="light">
-                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.9 4.9 1.4 1.4"></path><path d="m17.7 17.7 1.4 1.4"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m4.9 19.1 1.4-1.4"></path><path d="m17.7 6.3 1.4-1.4"></path></svg> Light
-                   </button>
-                 </div></div>
-      </div>
-              
-      <div class="setting-row">
-        <div class="setting-row__text">
-          <div class="setting-row__title">Local image cache</div>
-          <div class="setting-row__desc">0 images · 0.0 MB stored on this computer for fast product thumbnails.</div>
-        </div>
-        <div class="setting-row__control"><button class="btn btn--ghost btn--sm" type="button" id="clear-cache">Clear</button></div>
-      </div>
-              
-      <div class="setting-row">
-        <div class="setting-row__text">
-          <div class="setting-row__title">App data folder</div>
-          <div class="setting-row__desc">Configuration, demo database and cached images.</div>
-        </div>
-        <div class="setting-row__control"><button class="btn btn--ghost btn--sm" type="button" id="open-data"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6"></path><path d="m10 14 11-11"></path></svg> Open</button></div>
-      </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col" style="gap:14px">
-          <div class="card">
-            <div class="card__head">
-              <div>
-                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg> Session</div>
-                <div class="card__sub">Demo account</div>
-              </div>
-            </div>
-            <div class="card__body">
-              <div class="row" style="gap:12px">
-                       <span class="avatar" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span>
-                       <div class="grow">
-                         <div class="strong">Demo Manager</div>
-                         <div class="small mute">demo@stockflow.app</div>
-                       </div>
-                     </div>
-                     <div class="divider" style="margin:14px 0"></div>
-                     <div class="col" style="gap:7px">
-                       <div class="row row--between small"><span class="mute">Token expires</span>
-                         <span>8 Nov </span></div>
-                       <div class="row row--between small"><span class="mute">Server</span>
-                         <span class="mono">local demo</span></div>
-                     </div>
-                     <button class="btn btn--ghost btn--block" type="button" id="sign-out" style="margin-top:14px">
-                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path></svg> Sign out
-                     </button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card__head">
-              <div>
-                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg> About</div>
-                <div class="card__sub">StockFlow desktop</div>
-              </div>
-            </div>
-            <div class="card__body">
-              <div class="about-list">
-                <div class="about-item"><span>App</span><span>v1.0.0</span></div>
-                <div class="about-item"><span>Electron</span><span>45.2.3</span></div>
-                <div class="about-item"><span>Chromium</span><span>140.0.7339.80</span></div>
-                <div class="about-item"><span>Node</span><span>22.20.0</span></div>
-                <div class="about-item"><span>Platform</span><span>win32 x64</span></div>
-                <div class="about-item"><span>Mode</span><span>demo</span></div>
-              </div>
-              <div class="alert alert--info" style="margin-top:14px">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path><path d="m9 12 2 2 4-4"></path></svg>
-                <div>Your JWT stays in the main process (encrypted with the Windows credential store when available) and is never exposed to the interface.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card__head">
-              <div>
-                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.8 2.2a2 2 0 0 0-1.6 0L2.6 6.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.6 0l8.6-3.9a1 1 0 0 0 0-1.8Z"></path><path d="m22 12.2-9.2 4.2a2 2 0 0 1-1.6 0L2 12.2"></path><path d="m22 17.2-9.2 4.2a2 2 0 0 1-1.6 0L2 17.2"></path></svg> API endpoints used</div>
-                <div class="card__sub">Full Product Management API</div>
-              </div>
-            </div>
-            <div class="card__body">
-              <div class="col" style="gap:7px">
-                
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/auth/register</span>
-                    <span class="grow right mute" style="font-size:11px">Create an account</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/auth/login</span>
-                    <span class="grow right mute" style="font-size:11px">Get a 12h JWT</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/product</span>
-                    <span class="grow right mute" style="font-size:11px">List · search · paginate</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/product</span>
-                    <span class="grow right mute" style="font-size:11px">Create (multipart image)</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">PATCH</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/product/:id</span>
-                    <span class="grow right mute" style="font-size:11px">Update fields / image</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">DELETE</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/product/:id</span>
-                    <span class="grow right mute" style="font-size:11px">Remove a product</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/quantity/stock-in/:id</span>
-                    <span class="grow right mute" style="font-size:11px">Add stock</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/quantity/stock-out/:id</span>
-                    <span class="grow right mute" style="font-size:11px">Remove stock</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/quantity/low-stock</span>
-                    <span class="grow right mute" style="font-size:11px">Low-stock alerts</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/quantity/out-stock</span>
-                    <span class="grow right mute" style="font-size:11px">Out-of-stock list</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/order</span>
-                    <span class="grow right mute" style="font-size:11px">Create an order</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/order</span>
-                    <span class="grow right mute" style="font-size:11px">List orders</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">PATCH</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/order/status/:id</span>
-                    <span class="grow right mute" style="font-size:11px">Change status</span>
-                  </div>
-                  <div class="row" style="gap:8px;font-size:11.5px">
-                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">PATCH</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/order/cancel-order/:id</span>
-                    <span class="grow right mute" style="font-size:11px">Cancel + restock</span>
-                  </div>
-              </div>
-              <p class="small mute" style="margin-top:12px;line-height:1.6">
-                Dashboard figures are computed inside the app from the product and order endpoints,
-                so no additional API route is needed.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div></div>
+        <div class="view" id="view"><div class="view__inner"><div class="card"><div class="card__head"><div><h3>Demo Organization</h3><p class="small mute">1 active members · your role: owner</p></div></div>
+        <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead><tbody><tr><td>Demo Manager</td><td>demo@stockflow.app</td><td><select class="input input--sm" data-role-for="demo-membership" aria-label="Role for Demo Manager"><option value="owner" selected="">owner</option><option value="admin">admin</option><option value="staff">staff</option><option value="viewer">viewer</option></select></td><td class="right"><button class="btn btn--quiet btn--sm" data-remove="demo-membership">Remove</button></td></tr></tbody></table></div></div>
+        <div class="card"><div class="card__head"><h3>Accept an invitation</h3><span class="small mute">Paste a token you received</span></div><div class="card__body"><div class="row" style="gap:8px"><input class="input" id="accept-token" placeholder="Invitation token" spellcheck="false"><button class="btn btn--ghost btn--sm" type="button" id="accept-btn">Accept</button></div></div></div>
+        <div class="card"><div class="card__head"><h3>Audit log</h3><span class="small mute">0 recent entries</span></div><div class="table-wrap"><table class="data"><thead><tr><th>Action</th><th>Entity</th><th>When</th></tr></thead><tbody><tr><td colspan="3" class="mute">No audit entries yet.</td></tr></tbody></table></div></div>
+        <div class="card"><div class="card__head"><h3>Organization</h3></div><div class="card__body"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn btn--ghost btn--sm" type="button" id="leave-org">Leave organization</button><button class="btn btn--danger btn--sm" type="button" id="delete-org">Delete organization</button></div><p class="small mute" style="margin-top:10px">Leaving or deleting schedules a 30-day grace period. The last owner cannot leave or be removed.</p></div></div>
+        </div></div>
       </main>
     </div>
 
     <div id="modal-root"></div>
     <div class="toasts" id="toast-root"></div>
 
+    
+    
     
     
     

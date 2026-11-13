@@ -391,7 +391,7 @@
           target.focus();
           if (target.select) target.select();
         } else {
-          App.go('products');
+          openGlobalSearch();
         }
         return;
       }
@@ -414,6 +414,43 @@
         }
       }
     });
+  }
+
+  function openGlobalSearch() {
+    const body = ui.fromHTML('<div class="col"><input class="input" id="global-search" placeholder="Search products, orders, customers…" autocomplete="off" /><div id="global-search-results" style="min-height:40px"></div></div>');
+    const ref = ui.modal({ title: 'Global search', body });
+    const input = body.querySelector('#global-search');
+    const results = body.querySelector('#global-search-results');
+    let timer = null;
+    const run = async () => {
+      const query = input.value.trim();
+      if (!query) { results.innerHTML = '<p class="muted small">Type at least 2 characters.</p>'; return; }
+      results.innerHTML = '<p class="muted small">Searching…</p>';
+      try {
+        const data = await App.api.search(query);
+        const products = data.products || [];
+        const orders = data.orders || [];
+        results.innerHTML = `<div class="col" style="gap:8px">
+          ${products.length ? `<div class="small mute">Products (${products.length})</div>${products.map((product) => `<button class="btn btn--ghost btn--block" type="button" data-goto="products">${esc(product.name)} <span class="mute">${esc(product.sku || '')}</span></button>`).join('')}` : ''}
+          ${orders.length ? `<div class="small mute">Orders (${orders.length})</div>${orders.map((order) => `<button class="btn btn--ghost btn--block" type="button" data-goto="orders">${esc(order.customerName || 'Order')} <span class="mute">${esc(order.status || '')}</span></button>`).join('')}` : ''}
+          ${!products.length && !orders.length ? '<p class="muted small">No matches.</p>' : ''}
+        </div>`;
+        results.querySelectorAll('[data-goto]').forEach((button) => button.addEventListener('click', () => {
+          ref.close();
+          App.go(button.getAttribute('data-goto'));
+        }));
+      } catch (error) {
+        results.innerHTML = ui.alertBox('error', esc(error.message));
+      }
+    };
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(run, 250);
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') { event.preventDefault(); run(); }
+    });
+    setTimeout(() => input.focus(), 0);
   }
 
   function wireGlobalErrors() {

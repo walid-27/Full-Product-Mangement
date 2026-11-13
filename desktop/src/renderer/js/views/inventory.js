@@ -50,6 +50,39 @@
     saveActivity();
   }
 
+  /**
+   * Load the server-side movement history (GET /features/reports/movements).
+   * Falls back to the local log when the endpoint is unavailable.
+   */
+  async function loadServerMovements() {
+    try {
+      const data = await App.api.reports.movements({ limit: 100 });
+      const movements = (data && data.movements) || [];
+      if (!movements.length) {
+        loadActivity();
+        return;
+      }
+      const names = new Map(state.products.map((product) => [String(product._id), product.name]));
+      state.activity = movements.map((movement) => {
+        const productId = movement.product && typeof movement.product === 'object'
+          ? movement.product._id
+          : movement.product;
+        return {
+          at: movement.createdAt || movement.updatedAt,
+          productId,
+          productName: movement.productName || (movement.product && movement.product.name) || names.get(String(productId)) || 'Product',
+          action: movement.action,
+          quantity: movement.quantity,
+          stockBefore: movement.stockBefore,
+          stockAfter: movement.stockAfter,
+          variantSku: movement.variantSku || null
+        };
+      });
+    } catch (error) {
+      loadActivity();
+    }
+  }
+
   /* ---------------------------------------------------------------- stock */
 
   function stockBar(product) {
@@ -141,7 +174,7 @@
       return `<div class="card__body">${ui.emptyState({
         icon: 'clock',
         title: 'No movements recorded yet',
-        text: 'Every stock-in and stock-out you perform from this app is logged here on this computer, so you always have a local trail.',
+        text: 'Every stock-in and stock-out is recorded by the API as a movement. Adjust stock to create the first entry.',
         actionLabel: 'Adjust stock',
         onAction: () => {
           state.tab = 'all';
@@ -177,8 +210,8 @@
     return `
       <div class="card__body">
         <div class="row row--between" style="margin-bottom:8px">
-          <span class="small mute">Recorded on this device · last ${Math.min(state.activity.length, 60)} movements</span>
-          <button class="btn btn--quiet btn--sm" type="button" data-clear-activity>Clear log</button>
+          <span class="small mute">Server movement history · last ${Math.min(state.activity.length, 60)} movements</span>
+          <button class="btn btn--quiet btn--sm" type="button" data-clear-activity>Clear local log</button>
         </div>
         <div class="timeline">${rows}</div>
       </div>`;
@@ -595,7 +628,7 @@
     state.products = products;
     state.low = low;
     state.out = out;
-    loadActivity();
+    await loadServerMovements();
 
     App.state.catalog = products;
     App.state.lowStock = low;

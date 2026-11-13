@@ -2773,7 +2773,7 @@ table.data tbody tr:hover .row-actions {
           </div>
 
           <form class="auth-form" id="auth-form" novalidate="">
-            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label></div>
+            <div id="auth-fields" class="col" style="gap:13px"><label class="field"><span class="field__label">Email</span><input class="input" name="email" type="email" placeholder="you@example.com" autocomplete="username" autofocus="" value="demo@stockflow.app"></label><label class="field"><span class="field__label">Password</span><div class="input-group input-group--clear"><input class="input" name="password" type="password" placeholder="Your password" autocomplete="current-password"><button class="input-group__clear" type="button" data-reveal="" aria-label="Show password"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></label><div class="row row--between"><button class="btn btn--quiet btn--sm" type="button" id="forgot-link">Forgot password?</button><button class="btn btn--quiet btn--sm" type="button" id="verify-link">Verify email</button></div></div>
             <div id="auth-error" hidden=""></div>
             <button class="btn btn--primary btn--block" type="submit" id="auth-submit">Sign in</button>
           </form>
@@ -2822,17 +2822,23 @@ table.data tbody tr:hover .row-actions {
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h5"></path></svg>
           <span class="nav__text">Orders</span>
           <span class="nav__count" data-count="orders" hidden=""></span>
+        </button><button class="nav__item" type="button" data-route="reports">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"></rect><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"></rect><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"></rect></svg>
+          <span class="nav__text">Reports</span>
+          <span class="nav__count" data-count="reports" hidden=""></span>
         </button></nav>
         <div class="sidebar__foot">
-          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item is-active" type="button" data-route="settings">
+          <nav class="nav" id="nav-bottom" aria-label="Preferences"><button class="nav__item" type="button" data-route="team">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+          <span class="nav__text">Team</span>
+          <span class="nav__count" data-count="team" hidden=""></span>
+        </button><button class="nav__item is-active" type="button" data-route="settings">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path></svg>
           <span class="nav__text">Settings</span>
           <span class="nav__count" data-count="settings" hidden=""></span>
         </button></nav>
-          <button class="userchip" id="userchip" type="button" title="Account and settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
-        <span class="userchip__name">Demo Manager</span>
-        <span class="userchip__mail">demo@stockflow.app</span>
-      </span></button>
+          <div class="userchip" id="userchip" role="button" tabindex="0" title="Account and organization settings"><span class="avatar avatar--sm" style="background:linear-gradient(140deg, #34d399, #0f766e);color:#06121a">DM</span><span class="userchip__meta">
+        <span class="userchip__name">Demo Manager</span><span class="userchip__mail">Demo Organization</span></span></div>
         </div>
       </aside>
 
@@ -2840,7 +2846,7 @@ table.data tbody tr:hover .row-actions {
         <header class="pagehead">
           <div class="grow">
             <h1 id="page-title">Settings</h1>
-            <p class="pagehead__sub" id="page-sub">Connection, appearance and local data.</p>
+            <p class="pagehead__sub" id="page-sub">Connection, billing, integrations and local data.</p>
           </div>
           <div class="pagehead__actions" id="page-actions"><button type="button" class="btn btn--quiet btn--icon" title="Refresh (Ctrl+R)" aria-label="Refresh"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></svg></button></div>
         </header>
@@ -2945,6 +2951,100 @@ table.data tbody tr:hover .row-actions {
       </div>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8a2 2 0 0 0-2-2H5a2 2 0 0 1 0-4h13v4"></path><path d="M3 6v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"></path><path d="M18 12h3v4h-3a2 2 0 0 1 0-4Z"></path></svg> Billing &amp; plan</div>
+                <div class="card__sub">Owner only · Chargily checkout</div>
+              </div>
+              <span class="pill pill--neutral">business · active</span>
+            </div>
+            <div class="card__body">
+              <div class="col" style="gap:7px">
+                      <div class="row row--between small"><span class="mute">Products</span><span>16 / unlimited</span></div>
+                      <div class="row row--between small"><span class="mute">Orders this month</span><span>22 / unlimited</span></div>
+                      <div class="row row--between small"><span class="mute">Team members</span><span>1 / unlimited</span></div>
+                      <div class="row row--between small"><span class="mute">Reports / API / CSV</span><span>Enabled</span></div>
+                      
+                    </div>
+                    <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap">
+                      <button class="btn btn--primary btn--sm" type="button" id="billing-checkout">Upgrade / checkout</button>
+                      <button class="btn btn--ghost btn--sm" type="button" id="billing-portal">Billing portal</button>
+                      <button class="btn btn--ghost btn--sm" type="button" id="billing-cancel">Cancel plan</button>
+                      <button class="btn btn--ghost btn--sm" type="button" id="billing-invoices">Invoices</button>
+                    </div>
+                    <div id="billing-result" style="margin-top:10px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path><path d="m9 12 2 2 4-4"></path></svg> API keys &amp; webhooks</div>
+                <div class="card__sub">Owner / admin · public API + outgoing hooks</div>
+              </div>
+            </div>
+            <div class="card__body">
+              
+              <div class="row row--between" style="margin-bottom:8px"><span class="strong">API keys</span><button class="btn btn--ghost btn--sm" type="button" id="key-create">Create key</button></div>
+              <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Scopes</th><th>Rate</th><th></th></tr></thead><tbody><tr><td colspan="4" class="mute">No API keys yet.</td></tr></tbody></table></div>
+              <div class="row row--between" style="margin:14px 0 8px"><span class="strong">Webhooks</span><button class="btn btn--ghost btn--sm" type="button" id="hook-create">Create webhook</button></div>
+              <div class="table-wrap"><table class="data"><thead><tr><th>URL</th><th>Events</th><th></th></tr></thead><tbody><tr><td colspan="3" class="mute">No webhooks yet.</td></tr></tbody></table></div>
+              <div id="integrations-result" style="margin-top:10px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <div class="card__title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg> Account &amp; privacy</div>
+                <div class="card__sub">Notifications, export and deletion</div>
+              </div>
+            </div>
+            <div class="card__body" style="padding-top:4px;padding-bottom:4px">
+              
+              
+      <div class="setting-row">
+        <div class="setting-row__text">
+          <div class="setting-row__title">Low-stock email alerts</div>
+          <div class="setting-row__desc">Email me when a product runs low.</div>
+        </div>
+        <div class="setting-row__control"><label class="switch"><input type="checkbox" id="notif-low" checked=""><span class="switch__track"></span><span class="switch__text">On</span></label></div>
+      </div>
+              
+      <div class="setting-row">
+        <div class="setting-row__text">
+          <div class="setting-row__title">Customer order emails</div>
+          <div class="setting-row__desc">Email me when order statuses change.</div>
+        </div>
+        <div class="setting-row__control"><label class="switch"><input type="checkbox" id="notif-orders" checked=""><span class="switch__track"></span><span class="switch__text">On</span></label></div>
+      </div>
+              
+      <div class="setting-row">
+        <div class="setting-row__text">
+          <div class="setting-row__title">Export my data</div>
+          <div class="setting-row__desc">Download a JSON copy of your account, products, orders and movements.</div>
+        </div>
+        <div class="setting-row__control"><button class="btn btn--ghost btn--sm" type="button" id="account-export">Export</button></div>
+      </div>
+              
+      <div class="setting-row">
+        <div class="setting-row__text">
+          <div class="setting-row__title">Sign out everywhere</div>
+          <div class="setting-row__desc">Revoke every refresh session on every device.</div>
+        </div>
+        <div class="setting-row__control"><button class="btn btn--ghost btn--sm" type="button" id="logout-all">Sign out everywhere</button></div>
+      </div>
+              
+      <div class="setting-row">
+        <div class="setting-row__text">
+          <div class="setting-row__title">Delete my account</div>
+          <div class="setting-row__desc">Schedules deletion in 30 days and revokes every session.</div>
+        </div>
+        <div class="setting-row__control"><button class="btn btn--danger btn--sm" type="button" id="account-delete">Delete account</button></div>
+      </div>
+              <div id="account-result" style="margin-top:10px"></div>
+            </div>
+          </div>
         </div>
 
         <div class="col" style="gap:14px">
@@ -2965,8 +3065,10 @@ table.data tbody tr:hover .row-actions {
                      </div>
                      <div class="divider" style="margin:14px 0"></div>
                      <div class="col" style="gap:7px">
-                       <div class="row row--between small"><span class="mute">Token expires</span>
-                         <span>8 Nov </span></div>
+                       <div class="row row--between small"><span class="mute">Access token</span>
+                         <span>15 minutes · auto-refresh</span></div>
+                       <div class="row row--between small"><span class="mute">Email verified</span>
+                         <span>—</span></div>
                        <div class="row row--between small"><span class="mute">Server</span>
                          <span class="mono">local demo</span></div>
                      </div>
@@ -3017,72 +3119,222 @@ table.data tbody tr:hover .row-actions {
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
                     <span class="mono" style="color:var(--text-dim)">/auth/login</span>
-                    <span class="grow right mute" style="font-size:11px">Get a 12h JWT</span>
+                    <span class="grow right mute" style="font-size:11px">Get a 15m JWT + refresh cookie</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/auth/refresh</span>
+                    <span class="grow right mute" style="font-size:11px">Rotate the refresh token</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/auth/verify-email</span>
+                    <span class="grow right mute" style="font-size:11px">Verify email (token)</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/auth/forgot-password</span>
+                    <span class="grow right mute" style="font-size:11px">Request a reset link</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/auth/reset-password</span>
+                    <span class="grow right mute" style="font-size:11px">Reset with token</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/product</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/products</span>
                     <span class="grow right mute" style="font-size:11px">List · search · paginate</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/product</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/products</span>
                     <span class="grow right mute" style="font-size:11px">Create (multipart image)</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">PATCH</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/product/:id</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/products/:id</span>
                     <span class="grow right mute" style="font-size:11px">Update fields / image</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">DELETE</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/product/:id</span>
-                    <span class="grow right mute" style="font-size:11px">Remove a product</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/products/:id</span>
+                    <span class="grow right mute" style="font-size:11px">Soft-delete a product</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/quantity/stock-in/:id</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/products/:id/restore</span>
+                    <span class="grow right mute" style="font-size:11px">Restore a product</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/products/analysis</span>
+                    <span class="grow right mute" style="font-size:11px">Catalogue aggregate</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/inventory/stock-in/:id</span>
                     <span class="grow right mute" style="font-size:11px">Add stock</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/quantity/stock-out/:id</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/inventory/stock-out/:id</span>
                     <span class="grow right mute" style="font-size:11px">Remove stock</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/quantity/low-stock</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/inventory/low-stock</span>
                     <span class="grow right mute" style="font-size:11px">Low-stock alerts</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/quantity/out-stock</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/inventory/out-stock</span>
                     <span class="grow right mute" style="font-size:11px">Out-of-stock list</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/order</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/orders</span>
                     <span class="grow right mute" style="font-size:11px">Create an order</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/order</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/orders</span>
                     <span class="grow right mute" style="font-size:11px">List orders</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">PATCH</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/order/status/:id</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/orders/status/:id</span>
                     <span class="grow right mute" style="font-size:11px">Change status</span>
                   </div>
                   <div class="row" style="gap:8px;font-size:11.5px">
                     <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">PATCH</span>
-                    <span class="mono" style="color:var(--text-dim)">/api/order/cancel-order/:id</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/orders/cancel-order/:id</span>
                     <span class="grow right mute" style="font-size:11px">Cancel + restock</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">DELETE</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/orders/:id</span>
+                    <span class="grow right mute" style="font-size:11px">Soft-delete an order</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/dashboard/product</span>
+                    <span class="grow right mute" style="font-size:11px">Product dashboard</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/dashboard/order</span>
+                    <span class="grow right mute" style="font-size:11px">Order dashboard</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/features/reports/sales</span>
+                    <span class="grow right mute" style="font-size:11px">Sales / profit report</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/features/reports/best-sellers</span>
+                    <span class="grow right mute" style="font-size:11px">Best sellers</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/features/reports/stock</span>
+                    <span class="grow right mute" style="font-size:11px">Stock valuation</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/features/reports/movements</span>
+                    <span class="grow right mute" style="font-size:11px">Movement history</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/features/products/import</span>
+                    <span class="grow right mute" style="font-size:11px">CSV import</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/features/export/:type</span>
+                    <span class="grow right mute" style="font-size:11px">CSV / XLSX export</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/features/orders/:id/documents/:type</span>
+                    <span class="grow right mute" style="font-size:11px">Invoice / label PDF</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/features/orders/:id/shipment</span>
+                    <span class="grow right mute" style="font-size:11px">Create shipment</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/v1/search</span>
+                    <span class="grow right mute" style="font-size:11px">Global search</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/organizations</span>
+                    <span class="grow right mute" style="font-size:11px">List organizations</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/organizations/switch</span>
+                    <span class="grow right mute" style="font-size:11px">Switch organization</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/organizations/members</span>
+                    <span class="grow right mute" style="font-size:11px">Team members</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/organizations/invites</span>
+                    <span class="grow right mute" style="font-size:11px">Invite a member</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/billing/subscription</span>
+                    <span class="grow right mute" style="font-size:11px">Plan &amp; subscription</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/billing/usage</span>
+                    <span class="grow right mute" style="font-size:11px">Plan usage</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">POST</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/billing/checkout</span>
+                    <span class="grow right mute" style="font-size:11px">Start checkout</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/api-keys</span>
+                    <span class="grow right mute" style="font-size:11px">API keys</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/webhooks</span>
+                    <span class="grow right mute" style="font-size:11px">Outgoing webhooks</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/account/onboarding</span>
+                    <span class="grow right mute" style="font-size:11px">Onboarding checklist</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/api/account/export</span>
+                    <span class="grow right mute" style="font-size:11px">Export account data</span>
+                  </div>
+                  <div class="row" style="gap:8px;font-size:11.5px">
+                    <span class="pill pill--neutral" style="height:18px;font-size:10px;padding:0 6px;font-family:var(--font-mono)">GET</span>
+                    <span class="mono" style="color:var(--text-dim)">/health/ready</span>
+                    <span class="grow right mute" style="font-size:11px">Readiness probe</span>
                   </div>
               </div>
               <p class="small mute" style="margin-top:12px;line-height:1.6">
-                Dashboard figures are computed inside the app from the product and order endpoints,
-                so no additional API route is needed.
+                Dashboard figures come from the server dashboard endpoints with a client-side fallback.
+                Exports and PDF documents are saved through the main process.
               </p>
             </div>
           </div>
@@ -3095,6 +3347,8 @@ table.data tbody tr:hover .row-actions {
     <div id="modal-root"></div>
     <div class="toasts" id="toast-root"></div>
 
+    
+    
     
     
     
