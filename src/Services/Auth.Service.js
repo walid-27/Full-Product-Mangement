@@ -75,8 +75,14 @@ const register = async (data) => {
     } finally {
         await session.endSession();
     }
+    // The account now exists: neither the verification email nor analytics
+    // may turn a committed registration into an error response.
     await Account.sendVerification(user);
-    await Analytics.track("signup", { organization: organization._id, user: user._id });
+    try {
+        await Analytics.track("signup", { organization: organization._id, user: user._id });
+    } catch (error) {
+        console.error(JSON.stringify({ level: "error", msg: "Analytics tracking failed", message: error.message }));
+    }
     return authResponse(user, organization);
 };
 

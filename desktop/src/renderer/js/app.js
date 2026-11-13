@@ -298,17 +298,26 @@
     updateModeBadge(Boolean(App.state.config && App.state.config.demoMode));
   }
 
-  function showAuth() {
+  function showAuth(mode) {
     document.getElementById('boot').hidden = true;
     document.getElementById('shell').hidden = true;
     document.getElementById('view').innerHTML = '';
     document.getElementById('nav-main').innerHTML = '';
     document.getElementById('nav-bottom').innerHTML = '';
-    App.views.auth.show();
+    App.views.auth.show(mode);
   }
+
+  // An unverified account gets a session from the API but every tenant
+  // request answers 403 EMAIL_NOT_VERIFIED — never enter the shell in
+  // that state; send the user to the verification step instead.
+  const needsVerification = (session) => Boolean(session && session.emailVerified === false && !session.demo);
 
   async function onAuthenticated(session) {
     App.state.session = session || (await App.api.auth.session());
+    if (needsVerification(App.state.session)) {
+      showAuth('verify');
+      return;
+    }
     try {
       App.state.config = await App.api.config.get();
     } catch (error) {
@@ -481,6 +490,9 @@
     wireGlobalErrors();
 
     App.api.setSessionExpiredHandler(() => {
+      // Already on the sign-in screen (e.g. a resend attempt without a
+      // session): the auth form shows its own error, no toast loop.
+      if (document.getElementById('shell').hidden) return;
       if (App.state.signingOut) return;
       App.state.signingOut = true;
       ui.toast({
@@ -501,6 +513,10 @@
 
       if (config.session) {
         App.state.session = config.session;
+        if (needsVerification(config.session)) {
+          showAuth('verify');
+          return;
+        }
         showShell();
         await go('dashboard');
         startPolling();

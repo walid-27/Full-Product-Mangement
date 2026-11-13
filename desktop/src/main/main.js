@@ -263,7 +263,13 @@ ipcMain.handle('auth:login', async (_event, credentials) => {
   }
 
   if (!result.ok) {
-    return { ok: false, status: result.status, error: api.errorMessage(result) };
+    return {
+      ok: false,
+      status: result.status,
+      code: (result.data && result.data.code) || null,
+      details: (result.data && result.data.details) || null,
+      error: api.errorMessage(result)
+    };
   }
 
   const session = saveAuthResult(result, {
@@ -285,8 +291,8 @@ ipcMain.handle('auth:register', async (_event, form) => {
   };
 
   if (!body.email || !body.password) return { ok: false, error: 'Email and password are required.' };
-  if (body.password.length < 12 || !/[a-z]/.test(body.password) || !/[A-Z]/.test(body.password) || !/\d/.test(body.password)) {
-    return { ok: false, error: 'Use 12+ characters with uppercase, lowercase, and a number.' };
+  if (body.password.length < 12 || body.password.length > 72 || !/[a-z]/.test(body.password) || !/[A-Z]/.test(body.password) || !/\d/.test(body.password)) {
+    return { ok: false, error: 'Use 12 to 72 characters with uppercase, lowercase, and a number.' };
   }
 
   const result = config.demoMode
@@ -314,6 +320,19 @@ ipcMain.handle('auth:register', async (_event, form) => {
 });
 
 ipcMain.handle('auth:session', async () => publicSession());
+
+/*
+ * Re-reads the account state from the API (via the refresh-token rotation)
+ * so changes made outside the app — e.g. email verification from the mail
+ * link — are reflected in the stored session without a fresh login.
+ */
+ipcMain.handle('auth:refreshSession', async () => {
+  const config = store.get();
+  if (config.demoMode) return { ok: true, session: publicSession() };
+  const session = await refreshSession();
+  if (!session) return { ok: false, status: 401, error: 'Please sign in to continue.' };
+  return { ok: true, session: publicSession() };
+});
 
 ipcMain.handle('auth:logout', async () => {
   const config = store.get();

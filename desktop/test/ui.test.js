@@ -638,6 +638,22 @@ async function closeModals() {
     );
   });
 
+  await test('accepts a full verification link pasted into the verify form', async () => {
+    click($('[data-mode="login"]'));
+    await waitFor(() => $('#verify-link'), 'verify link');
+    click($('#verify-link'));
+    await waitFor(() => $('#auth-form [name="token"]'), 'verify fields');
+    assert.match(text('#auth-title'), /Verify your email/);
+
+    // Users paste the whole email link, not just the token.
+    $('#auth-form [name="token"]').value = 'http://localhost:5000/auth/verify-email?token=demo-verification-token-1234567890';
+    click($('#auth-submit'));
+
+    // Demo accounts hold a session, so verification continues straight in.
+    await waitFor(() => !$('#shell').hidden, 'signed in after verification');
+    await waitFor(() => $$('#view .stat').length === 4, 'dashboard after verification');
+  });
+
   await test('surfaces a friendlier error when the session is gone', async () => {
     // Force an unauthorised API response and check the app falls back to auth.
     await window.desktop.logout();

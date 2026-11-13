@@ -19,9 +19,29 @@ const issueToken = async (user, type, ttlMs) => {
     return raw;
 };
 
+/*
+ * The token is already stored when delivery is attempted. A mail-provider
+ * outage must never fail the surrounding request: registration would
+ * otherwise report an error for an account that now exists (and a retry
+ * then fails as a duplicate), and forgot-password would break its
+ * non-enumerating 202 contract. The user can always request a fresh email.
+ */
+const deliverSafely = async (send) => {
+    try {
+        await send();
+    } catch (error) {
+        console.error(JSON.stringify({
+            level: "error",
+            msg: "Email delivery failed",
+            code: (error && error.code) || "EMAIL_DELIVERY_FAILED",
+            message: (error && error.message) || "unknown error"
+        }));
+    }
+};
+
 const sendVerification = async (user) => {
     const token = await issueToken(user, "email-verification", 24 * 60 * 60 * 1000);
-    await Email.sendVerification(user, token);
+    await deliverSafely(() => Email.sendVerification(user, token));
 };
 
 const verifyEmail = async (rawToken) => {
@@ -45,7 +65,7 @@ const forgotPassword = async (email) => {
     const user = await Auth.findOne({ email });
     if (!user) return;
     const token = await issueToken(user, "password-reset", 60 * 60 * 1000);
-    await Email.sendPasswordReset(user, token);
+    await deliverSafely(() => Email.sendPasswordReset(user, token));
 };
 
 const resetPassword = async (rawToken, password) => {
