@@ -259,6 +259,14 @@ function listen(handler) {
     assert.strictEqual(config.session.email, 'demo@stockflow.app');
   });
 
+  await test('refreshes the stored session without exposing the token', async () => {
+    const refreshed = await call('auth:refreshSession');
+    assert.strictEqual(refreshed.ok, true);
+    assert.strictEqual(refreshed.session.email, 'demo@stockflow.app');
+    assert.strictEqual(refreshed.session.emailVerified, true);
+    assert.strictEqual('token' in refreshed.session, false);
+  });
+
   await test('never leaks the JWT through config:get', async () => {
     const config = await call('config:get');
     assert.strictEqual('token' in config.session, false);

@@ -71,7 +71,96 @@ const resetPassword = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+/* ------------------------------------------------------- browser pages */
+/*
+ * The verification / reset emails link here (GET), while the API clients
+ * use the POST endpoints above. Without these pages the emailed links
+ * answered 404 and verification dead-ended.
+ */
+
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+})[character]);
+
+const page = (res, status, title, body) => {
+    // Self-contained page: relax the API-wide CSP for this response only.
+    res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'");
+    return res.status(status).type("html").send(`<!doctype html>
+<html lang="en"><head><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escapeHtml(title)} · StockFlow</title>
+<style>
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:#0f1420; color:#e8ecf4; display:grid; place-items:center; min-height:100vh; }
+  main { background:#171e2e; border:1px solid #26314d; border-radius:14px; padding:32px; max-width:420px; width:calc(100% - 48px); }
+  h1 { font-size:20px; margin:0 0 10px; } p { color:#9aa7c2; line-height:1.6; font-size:14px; }
+  label { display:block; font-size:13px; margin:14px 0 6px; color:#c6d0e4; }
+  input { width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid #33415f; background:#0f1420; color:#e8ecf4; }
+  button { margin-top:18px; width:100%; padding:11px; border:0; border-radius:8px; background:#4f7cff; color:#fff; font-weight:600; cursor:pointer; }
+  .error { color:#ff9c9c; } .ok { color:#8be0a4; }
+</style></head><body><main>${body}</main></body></html>`);
+};
+
+const verifyEmailPage = async (req, res) => {
+    const token = String((req.query && req.query.token) || "");
+    if (token.length < 20 || token.length > 4096) {
+        return page(res, 400, "Verification failed",
+            `<h1>Verification failed</h1><p class="error">This verification link is invalid. Open the app and request a new verification email.</p>`);
+    }
+    try {
+        await Account.verifyEmail(token);
+        return page(res, 200, "Email verified",
+            `<h1 class="ok">Email verified</h1><p>Your email is confirmed. You can close this tab and sign in to StockFlow — your workspace is unlocked.</p>`);
+    } catch (err) {
+        return page(res, 400, "Verification failed",
+            `<h1>Verification failed</h1><p class="error">${escapeHtml(err.message || "This verification link is invalid or expired.")}</p><p>Open the app and request a new verification email.</p>`);
+    }
+};
+
+const resetPasswordPage = (req, res) => {
+    const token = String((req.query && req.query.token) || "");
+    if (token.length < 20 || token.length > 4096) {
+        return page(res, 400, "Reset link invalid",
+            `<h1>Reset link invalid</h1><p class="error">This password-reset link is invalid. Request a new one from the app.</p>`);
+    }
+    // The token is NOT consumed here — only the form submission (POST) uses it.
+    return page(res, 200, "Set a new password", `
+        <h1>Set a new password</h1>
+        <p>12+ characters with uppercase, lowercase and a number.</p>
+        <form id="reset-form">
+          <label for="password">New password</label>
+          <input id="password" type="password" autocomplete="new-password" required />
+          <label for="confirm">Confirm password</label>
+          <input id="confirm" type="password" autocomplete="new-password" required />
+          <button type="submit">Reset password</button>
+          <p id="result" role="status"></p>
+        </form>
+        <script>
+          document.getElementById('reset-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const result = document.getElementById('result');
+            const password = document.getElementById('password').value;
+            if (password !== document.getElementById('confirm').value) {
+              result.className = 'error'; result.textContent = 'The two passwords do not match.'; return;
+            }
+            try {
+              const response = await fetch('reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: ${JSON.stringify(token)}, password })
+              });
+              const data = await response.json().catch(() => ({}));
+              if (!response.ok) throw new Error(data.message || 'Reset failed');
+              result.className = 'ok';
+              result.textContent = 'Password reset. You can close this tab and sign in with your new password.';
+            } catch (error) {
+              result.className = 'error'; result.textContent = error.message;
+            }
+          });
+        </script>`);
+};
+
 module.exports = {
     register, login, refresh, logout, logoutAll,
-    verifyEmail, resendVerification, forgotPassword, resetPassword
+    verifyEmail, resendVerification, forgotPassword, resetPassword,
+    verifyEmailPage, resetPasswordPage
 };

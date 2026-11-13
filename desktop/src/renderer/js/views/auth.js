@@ -99,13 +99,13 @@
     );
   }
 
-  async function show() {
+  async function show(initialMode) {
     const host = document.getElementById('auth');
     const config = App.state.config || (await App.api.config.get());
     App.state.config = config;
 
     const demo = Boolean(config.demoMode);
-    state.mode = 'login';
+    state.mode = ['login', 'register', 'forgot', 'reset', 'verify'].includes(initialMode) ? initialMode : 'login';
     if (demo) state.email = DEMO_EMAIL;
 
     host.innerHTML = `
@@ -180,6 +180,7 @@
     host.hidden = false;
     bind(host);
     bindModeLinks(host);
+    if (state.mode !== 'login') setMode(state.mode);
   }
 
   const MODE_TEXT = {
@@ -224,7 +225,11 @@
           await App.api.auth.resendVerification();
           ui.toast({ type: 'success', title: 'Verification email sent', message: 'If verification is required, an email has been sent.' });
         } catch (error) {
-          showError(error.message);
+          if (error && (error.status === 401 || error.sessionExpired)) {
+            showError('Sign in first, then request a new verification email.');
+          } else {
+            showError(error.message);
+          }
         } finally {
           ui.setBusy(resend, false);
         }
@@ -232,12 +237,30 @@
     }
   }
 
+  // Mirrors the backend's common-password blocklist (src/utils/password.js).
+  const COMMON_PASSWORDS = new Set([
+    'password', 'password1', 'password123', 'password1234', '12345678', '123456789',
+    '1234567890', 'qwerty123', 'qwertyuiop', 'letmein123', 'welcome123', 'admin123',
+    'iloveyou', 'abc123456', 'changeme123', 'dragon123', 'football1', 'monkey123'
+  ]);
+
   function strongPasswordError(password) {
     if (!password || password.length < 12 || password.length > 72) return 'Use 12 to 72 characters.';
     if (!/[a-z]/.test(password)) return 'Include a lowercase letter.';
     if (!/[A-Z]/.test(password)) return 'Include an uppercase letter.';
     if (!/\d/.test(password)) return 'Include a number.';
+    if (COMMON_PASSWORDS.has(password.toLowerCase())) return 'Avoid a commonly used password.';
     return null;
+  }
+
+  // Users often paste the whole email link instead of the bare token.
+  function extractToken(value) {
+    const text = String(value || '').trim();
+    const match = text.match(/[?&]token=([^&\s]+)/);
+    if (match) {
+      try { return decodeURIComponent(match[1]); } catch (error) { return match[1]; }
+    }
+    return text.replace(/\s+/g, '');
   }
 
   function showError(message) {
@@ -363,7 +386,7 @@
       }
 
       if (state.mode === 'reset') {
-        const token = String(data.token || '').trim();
+        const token = extractToken(data.token);
         if (!token) throw new Error('Paste the reset token from your email.');
         const weak = strongPasswordError(password);
         if (weak) throw new Error(`Password: ${weak}`);
@@ -375,9 +398,19 @@
       }
 
       if (state.mode === 'verify') {
-        const token = String(data.token || '').trim();
+        const token = extractToken(data.token);
         if (!token) throw new Error('Paste the verification token from your email.');
         await App.api.auth.verifyEmail(token);
+        // The register/login session is still stored: refresh it so the
+        // verified state is picked up and the user can continue directly.
+        try {
+          const refreshed = await App.api.auth.refreshSession();
+          if (refreshed && refreshed.emailVerified !== false) {
+            ui.toast({ type: 'success', title: 'Email verified', message: 'Your workspace is unlocked — welcome to StockFlow.' });
+            App.onAuthenticated(refreshed);
+            return;
+          }
+        } catch (error) { /* fall through to sign-in */ }
         ui.toast({ type: 'success', title: 'Email verified', message: 'Sign in to continue.' });
         setMode('login');
         return;

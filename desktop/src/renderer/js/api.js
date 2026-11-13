@@ -272,6 +272,13 @@
         return { data: result.data, session: result.session || null };
       },
       session: () => bridge().getSession(),
+      async refreshSession() {
+        const bridgeApi = bridge();
+        if (typeof bridgeApi.refreshSession !== 'function') return bridgeApi.getSession();
+        const result = await bridgeApi.refreshSession();
+        if (!result.ok) throw new ApiError(result);
+        return result.session;
+      },
       logout: () => bridge().logout(),
       logoutAll: () => (typeof bridge().logoutAll === 'function' ? bridge().logoutAll() : bridge().logout()),
       verifyEmail: (token) => raw({ method: 'POST', path: '/auth/verify-email', body: { token }, auth: false }),

@@ -5,9 +5,10 @@ const outbox = [];
 const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
 })[character]);
-const template = (title, name, actionUrl, actionLabel) => `
+const template = (title, name, actionUrl, actionLabel, token) => `
     <html><body><h1>${title}</h1><p>Hello ${escapeHtml(name)},</p>
     <p><a href="${actionUrl}">${actionLabel}</a></p>
+    ${token ? `<p>Using the desktop app instead? Copy this code into it:</p><p><code>${escapeHtml(token)}</code></p>` : ""}
     <p>This link expires soon. If you did not request it, you can ignore this email.</p></body></html>`;
 
 const deliver = async (message) => {
@@ -43,7 +44,7 @@ const sendVerification = async (user, token) => {
     const url = `${config.APP_URL}/auth/verify-email?token=${encodeURIComponent(token)}`;
     await deliver({
         to: user.email, subject: "Verify your email", token,
-        html: template("Verify your email", user.name, url, "Verify email")
+        html: template("Verify your email", user.name, url, "Verify email", token)
     });
 };
 
@@ -52,7 +53,7 @@ const sendPasswordReset = async (user, token) => {
     const url = `${config.APP_URL}/auth/reset-password?token=${encodeURIComponent(token)}`;
     await deliver({
         to: user.email, subject: "Reset your password", token,
-        html: template("Reset your password", user.name, url, "Reset password")
+        html: template("Reset your password", user.name, url, "Reset password", token)
     });
 };
 

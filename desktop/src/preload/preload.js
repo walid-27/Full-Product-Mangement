@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('desktop', {
   login: (credentials) => ipcRenderer.invoke('auth:login', credentials),
   register: (form) => ipcRenderer.invoke('auth:register', form),
   getSession: () => ipcRenderer.invoke('auth:session'),
+  refreshSession: () => ipcRenderer.invoke('auth:refreshSession'),
   logout: () => ipcRenderer.invoke('auth:logout'),
   logoutAll: () => ipcRenderer.invoke('auth:logoutAll'),
   switchOrganization: (organizationId) => ipcRenderer.invoke('org:switch', organizationId),
